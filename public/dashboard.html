@@ -685,6 +685,196 @@
     }
     .btn-cancel-med:hover { background: #e2e8f0; }
 
+    /* ── SETTINGS PANEL ── */
+    .settings-group {
+      background: #f8fafc;
+      border: 1px solid #e2eaf0;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .settings-group-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 0;
+      border-top: 1px solid #e2eaf0;
+    }
+    .settings-row:first-of-type { border-top: none; padding-top: 0; }
+    .settings-label {
+      font-size: 0.875rem;
+      color: var(--navy);
+      font-weight: 500;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .settings-hint {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      font-weight: 400;
+    }
+    .settings-input {
+      padding: 8px 12px;
+      border: 1px solid #e2eaf0;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.875rem;
+      color: var(--navy);
+      outline: none;
+      width: 200px;
+      transition: border-color 0.18s, box-shadow 0.18s;
+      flex-shrink: 0;
+    }
+    .settings-input-sm { width: 70px; text-align: center; }
+    .settings-input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(86,124,141,0.12); }
+    .settings-select {
+      padding: 8px 12px;
+      border: 1px solid #e2eaf0;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.875rem;
+      color: var(--navy);
+      outline: none;
+      width: 200px;
+      flex-shrink: 0;
+      background: var(--white);
+      cursor: pointer;
+      transition: border-color 0.18s;
+    }
+    .settings-select:focus { border-color: var(--teal); }
+    /* Toggle switch */
+    .toggle-switch { position: relative; display: inline-flex; align-items: center; cursor: pointer; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-track {
+      width: 44px; height: 24px;
+      background: #cbd5e1;
+      border-radius: 12px;
+      position: relative;
+      transition: background 0.22s;
+    }
+    .toggle-switch input:checked + .toggle-track { background: var(--teal); }
+    .toggle-thumb {
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 18px; height: 18px;
+      background: white;
+      border-radius: 50%;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      transition: left 0.22s;
+    }
+    .toggle-switch input:checked + .toggle-track .toggle-thumb { left: 23px; }
+
+    /* ── ADMIN PANEL ── */
+    .admin-profile-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--navy) 0%, var(--teal) 100%);
+      border-radius: 12px;
+      margin-bottom: 14px;
+      color: white;
+    }
+    .admin-avatar {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,0.4);
+    }
+    .admin-name { font-weight: 700; font-size: 1rem; }
+    .admin-role { font-size: 0.75rem; opacity: 0.8; margin-top: 2px; }
+    .admin-stat-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .admin-stat {
+      background: #f8fafc;
+      border: 1px solid #e2eaf0;
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+    }
+    .admin-stat-val { font-size: 1.5rem; font-weight: 700; color: var(--navy); }
+    .admin-stat-label { font-size: 0.65rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px; }
+    .admin-section-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #94a3b8;
+      margin: 14px 0 8px;
+    }
+    .admin-patient-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid #e2eaf0;
+      border-radius: 10px;
+      margin-bottom: 6px;
+      transition: background 0.15s;
+    }
+    .admin-patient-row:hover { background: #f8fafc; }
+    .admin-patient-info { flex: 1; min-width: 0; }
+    .admin-patient-name { font-size: 0.85rem; font-weight: 600; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .admin-patient-meta { font-size: 0.72rem; color: #94a3b8; }
+    .btn-delete {
+      background: none;
+      border: 1px solid rgba(217,79,92,0.3);
+      border-radius: 7px;
+      padding: 4px 10px;
+      font-size: 0.72rem;
+      color: var(--red);
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.18s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .btn-delete:hover { background: var(--red); color: white; border-color: var(--red); }
+    .admin-action-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .btn-admin-action {
+      flex: 1;
+      padding: 10px;
+      background: #f1f5f9;
+      border: 1px solid #e2eaf0;
+      border-radius: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--navy);
+      cursor: pointer;
+      transition: all 0.18s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-admin-action:hover { background: var(--teal); color: white; border-color: var(--teal); }
+    .btn-admin-action.danger:hover { background: var(--red); color: white; border-color: var(--red); }
+    .admin-empty { text-align: center; padding: 20px; color: #94a3b8; font-size: 0.85rem; }
+
     @media (max-width: 900px) {
       .sidebar { width: 60px; }
       .sidebar-logo, .sidebar-section-label, .nav-item span, .nav-item .badge { display: none; }
@@ -739,11 +929,11 @@
 
     <div class="sidebar-section-label">System</div>
     <nav class="sidebar-nav">
-      <a href="#" class="nav-item">
+      <a href="#" class="nav-item" id="settingsNavBtn" onclick="openPanel('settingsPanel'); return false;">
         <span class="nav-icon">⚙️</span>
         <span>Settings</span>
       </a>
-      <a href="landing.html" class="nav-item">
+      <a href="#" class="nav-item" onclick="openPanel('adminPanel'); return false;">
         <span class="nav-icon">👤</span>
         <span>Admin</span>
       </a>
@@ -897,6 +1087,167 @@
         <span>Actions</span>
       </div>
       <div id="medsList"></div>
+    </div>
+  </div>
+
+  <!-- ── SETTINGS PANEL ── -->
+  <div class="floating-panel" id="settingsPanel" style="width:520px;max-height:88vh">
+    <div class="panel-head">
+      <h3>⚙️ Settings</h3>
+      <button class="panel-close" onclick="closeAllPanels()">✕</button>
+    </div>
+    <div class="panel-body" style="padding:0">
+      <div style="padding:6px 20px 14px;border-bottom:1px solid #e2eaf0;">
+        <p style="font-size:0.78rem;color:#94a3b8">HealthSync System Configuration</p>
+      </div>
+
+      <!-- General Settings -->
+      <div style="padding:20px">
+
+        <!-- Hospital Profile -->
+        <div class="settings-group">
+          <div class="settings-group-title">
+            <span style="font-size:1.1rem">🏥</span> Hospital Profile
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-label">
+              Facility name
+              <span class="settings-hint">Displayed across all records</span>
+            </div>
+            <input type="text" class="settings-input" id="cfg_facilityName" placeholder="HealthSync Emergency Reg.">
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-label">
+              Default timezone
+              <span class="settings-hint">Used for timestamps and reports</span>
+            </div>
+            <select class="settings-select" id="cfg_timezone">
+              <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
+              <option value="UTC">UTC</option>
+              <option value="America/New_York">America/New_York (EST)</option>
+              <option value="Europe/London">Europe/London (GMT)</option>
+            </select>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-label">
+              Date format
+              <span class="settings-hint">How dates appear in the system</span>
+            </div>
+            <select class="settings-select" id="cfg_dateFormat">
+              <option value="DD MMM YYYY">DD MMM YYYY</option>
+              <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+              <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+            </select>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-label">
+              Patient ID prefix
+              <span class="settings-hint">e.g. HS-2024-XXXX</span>
+            </div>
+            <input type="text" class="settings-input settings-input-sm" id="cfg_idPrefix" placeholder="HS" maxlength="6">
+          </div>
+        </div>
+
+        <!-- Display -->
+        <div class="settings-group">
+          <div class="settings-group-title">
+            <span style="font-size:1.1rem">🖥️</span> Display
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-label">
+              Dark mode
+              <span class="settings-hint">Toggle dark theme (experimental)</span>
+            </div>
+            <label class="toggle-switch" id="cfg_darkMode_wrap">
+              <input type="checkbox" id="cfg_darkMode" onchange="applyDarkMode(this.checked)">
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-label">
+              Compact table view
+              <span class="settings-hint">Show more rows in patient list</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="cfg_compact" onchange="applyCompactView(this.checked)">
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Save -->
+        <div style="padding-top:8px;display:flex;gap:10px">
+          <button class="btn-save-med" onclick="saveSettings()" style="flex:1;padding:12px">Save Settings</button>
+          <button class="btn-cancel-med" onclick="closeAllPanels()" style="padding:12px 20px">Cancel</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ADMIN PANEL ── -->
+  <div class="floating-panel" id="adminPanel" style="width:520px;max-height:88vh">
+    <div class="panel-head">
+      <h3>👤 Admin Panel</h3>
+      <button class="panel-close" onclick="closeAllPanels()">✕</button>
+    </div>
+    <div class="panel-body" style="padding:16px">
+
+      <!-- Admin profile card -->
+      <div class="admin-profile-card">
+        <div class="admin-avatar">👨‍⚕️</div>
+        <div>
+          <div class="admin-name">Hospital Administrator</div>
+          <div class="admin-role">HealthSync Emergency Registry · Full Access</div>
+        </div>
+      </div>
+
+      <!-- Quick stats -->
+      <div class="admin-stat-row">
+        <div class="admin-stat">
+          <div class="admin-stat-val" id="adminStatTotal">--</div>
+          <div class="admin-stat-label">Patients</div>
+        </div>
+        <div class="admin-stat">
+          <div class="admin-stat-val" id="adminStatCritical">--</div>
+          <div class="admin-stat-label">Critical</div>
+        </div>
+        <div class="admin-stat">
+          <div class="admin-stat-val" id="adminStatMeds">--</div>
+          <div class="admin-stat-label">Medications</div>
+        </div>
+      </div>
+
+      <!-- Patient management -->
+      <div class="admin-section-title">🛂 Patient Records Management</div>
+      <div id="adminPatientList"></div>
+
+      <!-- Data controls -->
+      <div class="admin-section-title">🛠️ Data Controls</div>
+      <div class="admin-action-row">
+        <button class="btn-admin-action" onclick="exportExcel()">📄 Export Excel</button>
+        <button class="btn-admin-action" onclick="exportCSV()">📃 Export CSV</button>
+      </div>
+      <div class="admin-action-row" style="margin-top:8px">
+        <button class="btn-admin-action danger" onclick="clearLocalPatients()">🗑️ Clear Local Patients</button>
+      </div>
+
+      <!-- System info -->
+      <div class="admin-section-title">ℹ️ System Info</div>
+      <div style="background:#f8fafc;border:1px solid #e2eaf0;border-radius:10px;padding:12px;font-size:0.78rem;color:#64748b;line-height:2">
+        <div><strong>App:</strong> HealthSync Emergency Registry</div>
+        <div><strong>Version:</strong> Prototype 2.0</div>
+        <div><strong>Storage:</strong> localStorage + Python server</div>
+        <div><strong>Session:</strong> <span id="adminSessionId">--</span></div>
+        <div><strong>DB File:</strong> medical_data.db</div>
+      </div>
+
     </div>
   </div>
 
@@ -1284,9 +1635,123 @@
       showToast('Medications updated successfully!', 'success');
     }
 
+    // ── ADMIN PANEL ────────────────────────────────────────────────────────────
+    function renderAdminPanel() {
+      // Stats
+      document.getElementById('adminStatTotal').textContent    = allPatients.length;
+      document.getElementById('adminStatCritical').textContent = allPatients.filter(p =>
+        (p.allergies && p.allergies.length > 0) || (p.conditions && p.conditions.length > 0)).length;
+      const allMedsAdmin = allPatients.flatMap(p => p.meds || []);
+      document.getElementById('adminStatMeds').textContent = [...new Set(allMedsAdmin.map(m => m.trim()).filter(Boolean))].length;
+
+      // Session
+      const sid = sessionStorage.getItem('loggedInUser') || 'Guest Session';
+      const el = document.getElementById('adminSessionId');
+      if (el) el.textContent = sid;
+
+      // Patient list — only localStorage patients (real ones, not MOCK)
+      const localPatients = (typeof getPatients === 'function') ? getPatients() : [];
+      const container = document.getElementById('adminPatientList');
+      if (localPatients.length === 0) {
+        container.innerHTML = `<div class="admin-empty">No locally registered patients yet.<br>MOCK data cannot be deleted.</div>`;
+        return;
+      }
+      container.innerHTML = '';
+      localPatients.forEach((p, i) => {
+        const row = document.createElement('div');
+        row.className = 'admin-patient-row';
+        const color = avatarColor(p.name || 'P');
+        const inits = initials(p.name || 'P');
+        row.innerHTML = `
+          <div class="avatar" style="background:${color};width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:white;flex-shrink:0">${inits}</div>
+          <div class="admin-patient-info">
+            <div class="admin-patient-name">${p.name || 'Unknown'}</div>
+            <div class="admin-patient-meta">${p.id || ''} &middot; ${p.blood || 'No blood group'} &middot; ${p.medComplete ? '✅ Profile complete' : '⚠️ Incomplete'}</div>
+          </div>
+          <button class="btn-delete" onclick="deletePatient('${p.id}')">🗑 Delete</button>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function deletePatient(patientId) {
+      if (!confirm(`Delete patient ${patientId}? This cannot be undone.`)) return;
+      if (typeof getPatients !== 'function') return;
+      const stored = getPatients().filter(p => p.id !== patientId);
+      if (typeof savePatients === 'function') savePatients(stored);
+      // Also remove from allPatients in memory
+      const idx = allPatients.findIndex(p => p.id === patientId);
+      if (idx > -1) allPatients.splice(idx, 1);
+      filteredPatients = filteredPatients.filter(p => p.id !== patientId);
+      updateStats();
+      renderTable(filteredPatients, '');
+      renderCriticalAlerts();
+      renderMedications();
+      renderAdminPanel();
+      showToast(`Patient ${patientId} deleted.`, 'success');
+    }
+
+    function clearLocalPatients() {
+      if (!confirm('Clear ALL locally registered patients? MOCK data will remain. This cannot be undone.')) return;
+      if (typeof savePatients === 'function') savePatients([]);
+      // Reload page data
+      const localP = (typeof getPatients === 'function') ? getPatients().filter(p => p.medComplete) : [];
+      allPatients = [...MOCK, ...localP];
+      filteredPatients = [...allPatients];
+      updateStats();
+      renderTable(filteredPatients, '');
+      renderCriticalAlerts();
+      renderMedications();
+      renderAdminPanel();
+      showToast('Local patients cleared. MOCK data preserved.', 'info');
+    }
+
+    // ── SETTINGS ─────────────────────────────────────────────────────────────
+    const SETTINGS_KEY = 'hs_settings';
+    function loadSettings() {
+      const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+      document.getElementById('cfg_facilityName').value = s.facilityName || 'HealthSync Emergency Reg.';
+      document.getElementById('cfg_timezone').value      = s.timezone    || 'Asia/Kolkata';
+      document.getElementById('cfg_dateFormat').value   = s.dateFormat   || 'DD MMM YYYY';
+      document.getElementById('cfg_idPrefix').value     = s.idPrefix     || 'HS';
+      document.getElementById('cfg_darkMode').checked   = s.darkMode     || false;
+      document.getElementById('cfg_compact').checked    = s.compact      || false;
+      if (s.darkMode)  applyDarkMode(true);
+      if (s.compact)   applyCompactView(true);
+    }
+    function saveSettings() {
+      const s = {
+        facilityName: document.getElementById('cfg_facilityName').value.trim() || 'HealthSync Emergency Reg.',
+        timezone:     document.getElementById('cfg_timezone').value,
+        dateFormat:   document.getElementById('cfg_dateFormat').value,
+        idPrefix:     document.getElementById('cfg_idPrefix').value.trim().toUpperCase() || 'HS',
+        darkMode:     document.getElementById('cfg_darkMode').checked,
+        compact:      document.getElementById('cfg_compact').checked,
+      };
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+      showToast('Settings saved!', 'success');
+      closeAllPanels();
+    }
+    function applyDarkMode(on) {
+      document.body.style.background    = on ? '#0f172a' : '';
+      document.body.style.color         = on ? '#e2e8f0' : '';
+      document.querySelectorAll('.stat-card,.table-container,.sidebar,.topbar,.floating-panel,.meds-table-wrap').forEach(el => {
+        el.style.background   = on ? '#1e293b' : '';
+        el.style.borderColor  = on ? '#334155' : '';
+      });
+    }
+    function applyCompactView(on) {
+      document.querySelectorAll('td, th').forEach(el => {
+        el.style.padding = on ? '8px 20px' : '';
+      });
+    }
+    // Load settings on page ready
+    window.addEventListener('DOMContentLoaded', () => { loadSettings(); }, { once: true });
+
     // ── PANEL OPEN / CLOSE ──────────────────────────────────────────────────
     function openPanel(id) {
       closeAllPanels();
+      if (id === 'adminPanel') renderAdminPanel();
       document.getElementById(id).classList.add('active');
       document.getElementById('panelBackdrop').classList.add('active');
     }
