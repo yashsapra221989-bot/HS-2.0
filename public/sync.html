@@ -162,31 +162,38 @@
 
   <script src="script.js"></script>
   <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      const loggedInId = sessionStorage.getItem('loggedInUser');
+    window.addEventListener('DOMContentLoaded', async () => {
+      const loggedInId = localStorage.getItem('loggedInUser');
       if (!loggedInId) { window.location.href = 'login.html?role=patient'; return; }
       
-      const profileId = sessionStorage.getItem('currentProfileId') || loggedInId;
+      const profileId = localStorage.getItem('currentProfileId') || loggedInId;
 
-      const patients = getPatients();
-      const user = patients.find(p => p.id === profileId);
-      if (user) {
-        document.getElementById('name').value = user.name || '';
-        document.getElementById('dob').value = user.dob || '';
-        document.getElementById('gender').value = user.gender || '';
-        document.getElementById('abha').value = user.abha || '';
-        document.getElementById('blood').value = user.blood || '';
-        document.getElementById('weight').value = user.weight || '';
-        document.getElementById('height').value = user.height || '';
-        document.getElementById('allergy').value = user.allergies ? user.allergies.join(', ') : '';
-        document.getElementById('meds').value = user.meds ? user.meds.join(', ') : '';
-        document.getElementById('condition').value = user.conditions ? user.conditions.join(', ') : '';
-        document.getElementById('surgeries').value = user.surgeries || '';
-        document.getElementById('ecName').value = user.ecName || '';
-        document.getElementById('ecRel').value = user.ecRel || '';
-        document.getElementById('ecPhone').value = user.ecPhone || user.phone || '';
-        document.getElementById('doctor').value = user.doctor || '';
+      try {
+        const res = await fetch(`/api/get-medical-data/${profileId}`);
+        const data = await res.json();
+        
+        if (data.success) {
+          const user = data;
+          document.getElementById('name').value = user.name || '';
+          document.getElementById('dob').value = user.dob || '';
+          document.getElementById('gender').value = user.gender || '';
+          document.getElementById('abha').value = user.abha || '';
+          document.getElementById('blood').value = user.blood || '';
+          document.getElementById('weight').value = user.weight || '';
+          document.getElementById('height').value = user.height || '';
+          document.getElementById('allergy').value = user.allergy || '';
+          document.getElementById('meds').value = user.meds || '';
+          document.getElementById('condition').value = user.condition || '';
+          document.getElementById('surgeries').value = user.surgeries || '';
+          document.getElementById('ecName').value = user.ecName || '';
+          document.getElementById('ecRel').value = user.ecRel || '';
+          document.getElementById('ecPhone').value = user.contact || '';
+          document.getElementById('doctor').value = user.doctor || '';
+        }
+      } catch (e) {
+        console.error("Could not fetch profile data: ", e);
       }
+      
       updateProgress();
     });
 
@@ -200,7 +207,7 @@
 
     document.querySelectorAll('input, select, textarea').forEach(el => el.addEventListener('input', updateProgress));
 
-    function signOut() { sessionStorage.removeItem('loggedInUser'); window.location.href = 'landing.html'; }
+    function signOut() { localStorage.removeItem('loggedInUser'); localStorage.removeItem('currentProfileId'); window.location.href = 'landing.html'; }
   </script>
 </body>
 </html>

@@ -7,6 +7,76 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <link rel="stylesheet" href="dashboard.css">
+  <style>
+    .m-section-header {
+      grid-column: 1 / -1;
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      color: var(--accent);
+      margin-top: 24px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+    .m-summary-box {
+      grid-column: 1 / -1;
+      background: rgba(86, 124, 141, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 0.85rem;
+      color: var(--text2);
+      line-height: 1.6;
+      text-align: left;
+    }
+    .m-lab-grid {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 12px;
+      margin-bottom: 24px;
+    }
+    .lab-card {
+      display: flex;
+      align-items: center;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      gap: 12px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+    .lab-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      border-color: rgba(126, 184, 212, 0.3);
+    }
+    .lab-icon {
+      font-size: 1.4rem;
+      background: var(--surface3);
+      width: 40px; height: 40px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .lab-info {
+      flex: 1;
+      text-align: left;
+    }
+    .lab-name { font-weight: 600; font-size: 0.9rem; color: var(--text); }
+    .lab-date { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--text3); margin-top: 4px; }
+    .lab-status {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 100px;
+      font-weight: 600;
+    }
+    .lab-status.green { background: rgba(0, 229, 160, 0.15); color: #00e5a0; }
+    .lab-status.red { background: rgba(255, 71, 87, 0.15); color: #ff4757; }
+    .lab-status.blue { background: rgba(0, 200, 255, 0.15); color: #00c8ff; }
+  </style>
 </head>
 <body>
   <div class="grid-bg"></div>
@@ -41,6 +111,10 @@
         <span class="nav-icon">💊</span>
         <span>Medications</span>
         <span class="badge" id="sidebarMedCount">0</span>
+      </a>
+      <a href="#" class="nav-item" id="navLabBtn" onclick="openPanel('labReportsPanel'); return false;">
+        <span class="nav-icon">🔬</span>
+        <span>Reports & Summaries</span>
       </a>
     </nav>
 
@@ -395,6 +469,16 @@
     </div>
   </div>
 
+  <div class="floating-panel" id="labReportsPanel" style="width:620px;max-height:88vh">
+    <div class="panel-head">
+      <h3>🔬 Lab Reports & Summaries <span class="section-badge blue" id="labBadge">0</span></h3>
+      <button class="panel-close" onclick="closeAllPanels()">✕</button>
+    </div>
+    <div class="panel-body" style="padding:16px; background: rgba(0,0,0,0.15);">
+      <div id="labReportsList" style="display:flex; flex-direction:column; gap:20px;"></div>
+    </div>
+  </div>
+
   <!-- ── EDIT MEDICATIONS MODAL ── -->
   <div class="edit-med-overlay" id="editMedModal">
     <div class="edit-med-card">
@@ -506,6 +590,7 @@
             renderCriticalAlerts();
             renderMedications();
             if (typeof renderBloodBank === 'function') renderBloodBank();
+            if (typeof renderLabReports === 'function') renderLabReports();
           }
         }
       } catch (e) {
@@ -666,8 +751,8 @@
 
     // ── CRITICAL ALERTS ───────────────────────────────────────────────────────
     const DISMISSED_KEY = 'hs_dismissed_alerts';
-    function getDismissed() { return JSON.parse(sessionStorage.getItem(DISMISSED_KEY) || '[]'); }
-    function saveDismissed(arr) { sessionStorage.setItem(DISMISSED_KEY, JSON.stringify(arr)); }
+    function getDismissed() { return JSON.parse(localStorage.getItem(DISMISSED_KEY) || '[]'); }
+    function saveDismissed(arr) { localStorage.setItem(DISMISSED_KEY, JSON.stringify(arr)); }
 
     function dismissAlert(patientId) {
       const dismissed = getDismissed();
@@ -823,7 +908,7 @@
       document.getElementById('adminStatMeds').textContent = [...new Set(allMedsAdmin.map(m => m.trim()).filter(Boolean))].length;
 
       // Session
-      const sid = sessionStorage.getItem('loggedInUser') || 'Guest Session';
+      const sid = localStorage.getItem('loggedInUser') || 'Guest Session';
       const el = document.getElementById('adminSessionId');
       if (el) el.textContent = sid;
 
@@ -1090,6 +1175,73 @@
          document.getElementById('sosAlertBanner').style.display = 'none';
          activeAlertId = null;
       } catch(e) {}
+    }
+
+    // ── LAB REPORTS & SUMMARIES RENDERING ──
+    function renderLabReports() {
+      const el = document.getElementById('labReportsList');
+      const badge = document.getElementById('labBadge');
+      if (!el || !badge) return;
+
+      badge.textContent = allPatients.length;
+      if (allPatients.length === 0) {
+        el.innerHTML = `<div class="alerts-empty"><div class="empty-icon">📂</div><p>No patient records available for reports.</p></div>`;
+        return;
+      }
+
+      let html = '';
+      allPatients.forEach(p => {
+        // Compute Summary
+        let ageText = 'unknown age';
+        if (p.dob) {
+          const diff = Date.now() - new Date(p.dob).getTime();
+          ageText = Math.floor(diff / (365.25*24*3600*1000)) + ' yr old';
+        }
+        let summaryText = `Patient is a ${ageText} ${(p.gender || 'individual').toLowerCase()}. `;
+        if (p.conditions && p.conditions.length > 0) {
+          summaryText += `They have a documented history of ${p.conditions.join(', ')}. `;
+        } else {
+          summaryText += `They have no major documented chronic conditions. `;
+        }
+        if (p.allergies && p.allergies.length > 0) {
+          summaryText += `Known critical allergies include: ${p.allergies.join(', ')}. `;
+        }
+        if (p.surgeries) {
+          summaryText += `Past surgical history: ${p.surgeries}.`;
+        }
+
+        // Mock Labs
+        const mockLabs = [];
+        const isHighRisk = (p.conditions && p.conditions.length > 0) || (p.blood && p.blood.includes('-'));
+        mockLabs.push({ name: 'Complete Blood Count', status: 'Normal', color: 'green' });
+        if (isHighRisk) {
+          mockLabs.push({ name: 'Lipid Panel', status: 'High LDL', color: 'red' });
+          mockLabs.push({ name: 'HbA1c', status: '6.4%', color: 'amber' });
+        } else {
+          mockLabs.push({ name: 'Metabolic Panel', status: 'Normal', color: 'green' });
+        }
+
+        const labTags = mockLabs.map(l => `<div class="lab-card" style="padding:6px 12px; gap:8px;"><div class="lab-name" style="font-size:0.75rem;">${l.name}</div><div class="lab-status ${l.color}" style="font-size:0.65rem;">${l.status}</div></div>`).join('');
+
+        const color = avatarColor(p.name || 'P');
+        const inits = initials(p.name || 'P');
+
+        html += `
+          <div style="background: var(--surface2); border: 1px solid var(--border); border-radius: 14px; padding: 20px;">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+              <div class="avatar" style="background:${color}; width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; color:white;">${inits}</div>
+              <div>
+                <div style="font-family:'Syne', sans-serif; font-weight:700; font-size:1.05rem; color:var(--text);">${p.name || 'Unknown Patient'}</div>
+                <div style="font-family:'DM Mono', monospace; font-size:0.75rem; color:var(--text3);">${p.id || 'No ID'}</div>
+              </div>
+            </div>
+            <div class="m-summary-box" style="margin-bottom:12px; padding:12px;">${summaryText}</div>
+            <div class="m-section-header" style="margin-top:0; border-bottom:none; font-size:0.85rem; margin-bottom:6px;">Recent Lab Reports</div>
+            <div style="display:flex; flex-wrap:wrap; gap:8px;">${labTags}</div>
+          </div>
+        `;
+      });
+      el.innerHTML = html;
     }
   </script>
 </body>

@@ -67,6 +67,25 @@
     .error-card p { color: var(--text2); font-size: 0.9rem; }
 
     @media (max-width: 600px) { .detail-grid { grid-template-columns: 1fr; } .profile-header { flex-direction: column; text-align: center; gap: 14px; } }
+
+    /* SOS Alert Feature */
+    .sos-trigger-btn { background: rgba(255,71,87,0.1); border: 1px solid rgba(255,71,87,0.5); color: var(--red); font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; width: 100%; padding: 18px; border-radius: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 24px; transition: all 0.2s; animation: bloodPulse 2.5s infinite; }
+    .sos-trigger-btn:hover { background: rgba(255,71,87,0.2); transform: translateY(-2px); }
+
+    .sos-modal { position: fixed; inset: 0; background: rgba(6,8,15,0.9); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s; padding: 20px; }
+    .sos-modal.active { opacity: 1; pointer-events: auto; }
+    .sos-content { background: var(--surface); border: 2px solid var(--red); border-radius: 20px; padding: 32px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 20px 50px rgba(255,71,87,0.15); transform: translateY(20px); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    .sos-modal.active .sos-content { transform: translateY(0); }
+    
+    .sos-content h2 { font-family: 'Syne', sans-serif; color: var(--red); font-size: 1.8rem; margin-bottom: 12px; }
+    .sos-content p { color: var(--text2); font-size: 0.95rem; margin-bottom: 28px; line-height: 1.5; }
+    
+    .btn-sos { background: var(--red); color: white; border: none; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; width: 100%; padding: 18px; border-radius: 12px; cursor: pointer; margin-bottom: 12px; transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-sos:hover { background: #ff2a3f; }
+    .btn-sos:disabled { opacity: 0.6; cursor: not-allowed; }
+    
+    .btn-sos-cancel { background: transparent; border: 1px solid var(--border); color: var(--text); font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 1rem; width: 100%; padding: 16px; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
+    .btn-sos-cancel:hover { background: var(--surface2); border-color: var(--text3); }
   </style>
 </head>
 <body>
@@ -77,6 +96,11 @@
     <div class="status-badge">
       <span>✅</span> QR Scanned — Emergency Read-Only View
     </div>
+
+    <!-- SOS Trigger Button -->
+    <button class="sos-trigger-btn" onclick="openSosModal()">
+      <span>🚨</span> SEND EMERGENCY SOS
+    </button>
 
     <div class="profile-header">
       <div class="avatar" id="vAvatar">--</div>
@@ -125,6 +149,23 @@
   <div class="viewer-container error-card" id="errorView">
     <h2>Record Not Found</h2>
     <p>The scanned QR code points to a patient record that does not exist or has been removed.</p>
+  </div>
+
+  <!-- SOS Modal Overlay -->
+  <div class="sos-modal" id="sosModal">
+    <div class="sos-content">
+      <h2>🚨 Emergency SOS</h2>
+      <p>This will permanently alert the hospital with your current GPS location and the patient's ID.</p>
+      
+      <button class="btn-sos" id="confirmSosBtn" onclick="sendSosAlert()">
+        Share Location & Send SOS
+      </button>
+      
+      <!-- User Requested Back Button -->
+      <button class="btn-sos-cancel" onclick="closeSosModal()">
+        ← Back / Cancel
+      </button>
+    </div>
   </div>
 
   <script src="script.js"></script>
@@ -197,6 +238,71 @@
 
       document.getElementById('vPhone').textContent = p.ecPhone || p.phone || 'No phone provided';
       document.getElementById('vRel').textContent = `${p.ecName || 'N/A'} (${p.ecRel || 'N/A'})`;
+    }
+
+    // --- SOS functionality ---
+    function openSosModal() {
+      document.getElementById('sosModal').classList.add('active');
+    }
+    
+    function closeSosModal() {
+      document.getElementById('sosModal').classList.remove('active');
+    }
+
+    // Close on click outside Modal
+    document.getElementById('sosModal').addEventListener('click', e => {
+      if(e.target === document.getElementById('sosModal')) closeSosModal();
+    });
+
+    async function sendSosAlert() {
+      const btn = document.getElementById('confirmSosBtn');
+      btn.textContent = 'Acquiring GPS...';
+      btn.disabled = true;
+
+      const payload = { manual_location: 'Triggered from Patient QR' };
+      
+      const pingServer = async () => {
+        try {
+          const res = await fetch('/api/sos-alert', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (data.success) {
+            btn.textContent = '✓ SOS Sent Successfully';
+            btn.style.background = 'var(--green)';
+            setTimeout(closeSosModal, 2500);
+          } else {
+            btn.textContent = '❌ Failed to connect';
+            setTimeout(() => { btn.disabled = false; btn.textContent = 'Share Location & Send SOS'; }, 3000);
+          }
+        } catch(e) {
+          btn.textContent = '❌ Network Error';
+          setTimeout(() => { btn.disabled = false; btn.textContent = 'Share Location & Send SOS'; }, 3000);
+        }
+      };
+
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            payload.lat = pos.coords.latitude;
+            payload.lon = pos.coords.longitude;
+            btn.textContent = 'Sending Alert...';
+            pingServer();
+          },
+          (err) => {
+            console.warn('Geolocation blocked or failed:', err);
+            btn.textContent = 'Sending without GPS...';
+            // Send anyway without lat/lon
+            pingServer();
+          },
+          { timeout: 7000 }
+        );
+      } else {
+         btn.textContent = 'Sending without GPS...';
+         pingServer();
+      }
     }
   </script>
 </body>

@@ -140,7 +140,7 @@
     .sos-modal-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
     .sos-modal {
       background: var(--bg); border: 2px solid rgba(220, 38, 38, 0.4); border-radius: 20px;
-      width: 100%; max-width: 400px; padding: 32px; text-align: center; color: var(--text);
+      width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; padding: 32px 24px; text-align: center; color: var(--text);
       box-shadow: 0 20px 60px rgba(220, 38, 38, 0.2);
     }
     .sos-modal h2 { font-family: 'Syne', sans-serif; font-size: 1.8rem; color: #fca5a5; margin-bottom: 24px; }
@@ -1019,8 +1019,11 @@
 
   <!-- SOS Modal -->
   <div class="sos-modal-overlay" id="sosModal">
-    <div class="sos-modal">
-      <h2>EMERGENCY ACTION</h2>
+    <div class="sos-modal" style="position: relative;">
+      <button onclick="closeSOS()" style="position: absolute; top: 24px; left: 24px; background: none; border: none; color: var(--text2); font-family: 'DM Mono', monospace; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: color 0.2s;">
+        <span style="font-size: 1.1rem;">←</span> Back
+      </button>
+      <h2 style="margin-top: 10px;">EMERGENCY ACTION</h2>
       
       <div class="sos-gps-box" id="gpsBox">
         Fetching exact location...

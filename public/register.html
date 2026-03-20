@@ -634,9 +634,9 @@
         const data = await res.json();
 
         if (data.success) {
-          // Store in localStorage for prototype login compatibility
-          localStorage.setItem('userId', userId);
-          sessionStorage.setItem('loggedInUser', userId); // automatically log them in
+          // Store in localStorage for persistent login
+          localStorage.setItem('loggedInUser', userId);
+          localStorage.setItem('currentProfileId', userId);
           localStorage.setItem('medicalData', JSON.stringify({ name: name }));
 
           // Show success overlay

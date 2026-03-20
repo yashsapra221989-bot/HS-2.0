@@ -843,7 +843,8 @@
     function doLoginSuccess(userId, remember) {
       if (remember) localStorage.setItem('rememberedUserId', userId);
       else          localStorage.removeItem('rememberedUserId');
-      sessionStorage.setItem('loggedInUser', userId);
+      localStorage.setItem('loggedInUser', userId);
+      localStorage.setItem('currentProfileId', userId);
       
       // Show overlay
       document.getElementById('successOverlay').classList.add('show');

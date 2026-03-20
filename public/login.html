@@ -644,7 +644,7 @@
         badge.className = 'role-badge badge-patient';
         document.getElementById('authTabs').style.display = 'flex';
         document.getElementById('fieldsLogin').innerHTML = `
-          <div class="form-group"><label>Email</label><div class="input-wrap"><span class="input-icon">📧</span><input type="email" id="patLoginEmail" required placeholder="you@example.com"></div></div>
+          <div class="form-group"><label>Patient ID</label><div class="input-wrap"><span class="input-icon">👤</span><input type="text" id="patLoginEmail" required placeholder="HS-YYYY-XXXX"></div></div>
           <div class="form-group"><label>Password</label><div class="input-wrap"><span class="input-icon">🔒</span><input type="password" id="patLoginPw" required style="padding-right:40px;" placeholder="Your password"><button type="button" class="toggle-pw" onclick="togglePw('patLoginPw',this)">👁️</button></div></div>`;
         document.getElementById('fieldsRegister').innerHTML = `
           <div class="form-group"><label>Full Name</label><div class="input-wrap"><span class="input-icon">👤</span><input type="text" id="regName" placeholder="Your full name"></div></div>
@@ -705,13 +705,35 @@
         return;
       } else {
         if (currentMode === 'login') {
-          userLogin(document.getElementById('patLoginEmail').value.trim(), document.getElementById('patLoginPw').value);
+          const userId = document.getElementById('patLoginEmail').value.trim();
+          const pw = document.getElementById('patLoginPw').value;
+          
+          (async () => {
+            const res = await userLogin(userId, pw);
+            if (!res.success) {
+              errEl.textContent = '// ERR: ' + (res.error || 'Login failed.');
+              errEl.style.display = 'block';
+            }
+          })();
         } else {
           const pw1 = document.getElementById('regPw').value;
           const pw2 = document.getElementById('regConfirmPw').value;
           if (pw1 !== pw2) { errEl.textContent = '// ERR: Passwords do not match.'; errEl.style.display = 'block'; return; }
           if (pw1.length < 6) { errEl.textContent = '// ERR: Password must be at least 6 characters.'; errEl.style.display = 'block'; return; }
-          registerUser(document.getElementById('regName').value.trim(), document.getElementById('regEmail').value.trim(), document.getElementById('regPhone').value.trim(), pw1);
+          
+          const name = document.getElementById('regName').value.trim();
+          const email = document.getElementById('regEmail').value.trim();
+          const phone = document.getElementById('regPhone').value.trim();
+          
+          (async () => {
+            const res = await registerUser(name, email, phone, pw1);
+            if (!res.success) {
+              errEl.textContent = '// ERR: ' + (res.error || 'Registration failed.');
+              errEl.style.display = 'block';
+            } else {
+              // Success handled inside registerUser (toast and redirect)
+            }
+          })();
         }
       }
     });

@@ -188,28 +188,33 @@
     let currentUser = null;
     let accountId = null;
 
-    window.addEventListener('DOMContentLoaded', () => {
-      accountId = sessionStorage.getItem('loggedInUser');
+    window.addEventListener('DOMContentLoaded', async () => {
+      accountId = localStorage.getItem('loggedInUser');
       if (!accountId) { window.location.href = 'login.html?role=patient'; return; }
       
-      let currentProfileId = sessionStorage.getItem('currentProfileId') || accountId;
-      const patients = getPatients();
+      let currentProfileId = localStorage.getItem('currentProfileId') || accountId;
       
-      currentUser = patients.find(p => p.id === currentProfileId);
-      if (!currentUser) {
-         // Fallback if profile not found
-         currentUser = patients.find(p => p.id === accountId);
-         if(currentUser) {
-            sessionStorage.setItem('currentProfileId', accountId);
-         } else {
-            return;
-         }
-      }
+      try {
+          const res = await fetch(`/api/get-medical-data/${currentProfileId}`);
+          const data = await res.json();
+          if (data.success) {
+              currentUser = data;
+          } else {
+              if (currentProfileId !== accountId) {
+                  localStorage.setItem('currentProfileId', accountId);
+                  window.location.reload();
+                  return;
+              } else {
+                  // completely missing? might be a new user needing sync
+                  currentUser = { id: accountId, name: 'New User' };
+              }
+          }
+      } catch (e) { console.error('Error fetching data:', e); return; }
 
-      renderFamilySwitcher();
+      await renderFamilySwitcher();
       
-      if (!currentUser.medComplete) {
-         // We might be looking at an empty profile
+      // If we don't have blood group or name, they might need to complete profile
+      if (!currentUser.blood && !currentUser.contact) {
          document.getElementById('editModal').querySelector('h3').textContent = "Complete Profile Info";
       }
 
@@ -217,22 +222,29 @@
       refreshSummary();
     });
 
-    function renderFamilySwitcher() {
+    async function renderFamilySwitcher() {
       const switcher = document.getElementById('familySwitcher');
       switcher.innerHTML = '';
-      const patients = getPatients();
-      const myProfiles = patients.filter(p => p.account_id === accountId || p.id === accountId);
-
-      myProfiles.forEach(p => {
-        const btn = document.createElement('button');
-        btn.className = 'family-btn ' + (p.id === currentUser.id ? 'active' : '');
-        btn.textContent = p.id === accountId ? 'My Profile' : (p.name || 'Unnamed');
-        btn.onclick = () => {
-          sessionStorage.setItem('currentProfileId', p.id);
-          window.location.reload();
-        };
-        switcher.appendChild(btn);
-      });
+      
+      try {
+          const res = await fetch(`/api/get-family-profiles/${accountId}`);
+          const data = await res.json();
+          if (data.success && data.profiles) {
+              // Add Main Account manually or it's returned by SQLite?
+              // The SQLite query grabs ALL records where account_id = accountId.
+              // So the main account is included!
+              data.profiles.forEach(p => {
+                const btn = document.createElement('button');
+                btn.className = 'family-btn ' + (p.id === currentUser.id ? 'active' : '');
+                btn.textContent = p.id === accountId ? 'My Profile' : (p.name || 'Unnamed');
+                btn.onclick = () => {
+                  localStorage.setItem('currentProfileId', p.id);
+                  window.location.reload();
+                };
+                switcher.appendChild(btn);
+              });
+          }
+      } catch (e) {}
 
       const addBtn = document.createElement('button');
       addBtn.className = 'family-btn btn-add-member';
@@ -247,41 +259,62 @@
       const setVal = (id, val) => {
         const el = document.getElementById(id);
         if (!val || val.length === 0) { el.textContent = 'None recorded'; el.className = 'block-val empty'; }
-        else { el.textContent = Array.isArray(val) ? val.join(', ') : val; el.className = 'block-val'; }
+        else { el.textContent = val; el.className = 'block-val'; }
       };
-      setVal('sumBlood', currentUser.blood); setVal('sumPhone', currentUser.ecPhone);
-      setVal('sumAllergies', currentUser.allergies); setVal('sumMeds', currentUser.meds); setVal('sumConds', currentUser.conditions);
+      setVal('sumBlood', currentUser.blood); 
+      setVal('sumPhone', currentUser.contact);
+      setVal('sumAllergies', currentUser.allergy); 
+      setVal('sumMeds', currentUser.meds); 
+      setVal('sumConds', currentUser.condition);
     }
 
     function openModal() {
       document.getElementById('modBlood').value = currentUser.blood || '';
-      document.getElementById('modPhone').value = currentUser.ecPhone || '';
-      document.getElementById('modAllergies').value = currentUser.allergies ? currentUser.allergies.join(', ') : '';
-      document.getElementById('modMeds').value = currentUser.meds ? currentUser.meds.join(', ') : '';
-      document.getElementById('modConds').value = currentUser.conditions ? currentUser.conditions.join(', ') : '';
+      document.getElementById('modPhone').value = currentUser.contact || '';
+      document.getElementById('modAllergies').value = currentUser.allergy || '';
+      document.getElementById('modMeds').value = currentUser.meds || '';
+      document.getElementById('modConds').value = currentUser.condition || '';
       document.getElementById('editModal').classList.add('active');
     }
     function closeModal() { document.getElementById('editModal').classList.remove('active'); }
     document.getElementById('editModal').addEventListener('click', e => { if(e.target === document.getElementById('editModal')) closeModal(); });
 
-    function saveModal() {
+    async function saveModal() {
       currentUser.blood = document.getElementById('modBlood').value.trim();
-      currentUser.ecPhone = document.getElementById('modPhone').value.trim();
-      const parts = str => str ? str.split(',').map(s=>s.trim()).filter(Boolean) : [];
-      currentUser.allergies = parts(document.getElementById('modAllergies').value);
-      currentUser.meds = parts(document.getElementById('modMeds').value);
-      currentUser.conditions = parts(document.getElementById('modConds').value);
-      currentUser.medComplete = true;
+      currentUser.contact = document.getElementById('modPhone').value.trim();
+      currentUser.allergy = document.getElementById('modAllergies').value.trim();
+      currentUser.meds = document.getElementById('modMeds').value.trim();
+      currentUser.condition = document.getElementById('modConds').value.trim();
 
-      const patients = getPatients();
-      const idx = patients.findIndex(p => p.id === currentUser.id);
-      if (idx !== -1) { patients[idx] = currentUser; savePatients(patients); }
-      
-      saveMedicalDataToServer(); // Optional push
-      refreshSummary(); closeModal(); showToast('Profile updated!', 'success');
-      
-      // Remove any complete profile warnings
-      renderFamilySwitcher();
+      const payload = {
+          id: currentUser.id,
+          account_id: accountId,
+          name: currentUser.name,
+          blood: currentUser.blood,
+          contact: currentUser.contact,
+          allergy: currentUser.allergy,
+          meds: currentUser.meds,
+          condition: currentUser.condition
+      };
+
+      try {
+          const res = await fetch('/api/save-medical-data', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (data.success) {
+              refreshSummary(); 
+              closeModal(); 
+              showToast('Profile updated!', 'success');
+              renderFamilySwitcher();
+          } else {
+              showToast('Failed to save profile', 'error');
+          }
+      } catch (e) {
+          showToast('Could not reach server', 'error');
+      }
     }
 
     function openAddMemberModal() { document.getElementById('addMemberModal').classList.add('active'); }
@@ -297,7 +330,7 @@
 
       const newId = await createFamilyMember(name, rel);
       if (newId) {
-        sessionStorage.setItem('currentProfileId', newId);
+        localStorage.setItem('currentProfileId', newId);
         window.location.reload();
       } else {
         showToast('Failed to create profile', 'error');
@@ -306,7 +339,7 @@
     }
 
     function previewScan() { window.location.href = `viewer.html?id=${encodeURIComponent(currentUser.id)}`; }
-    function signOut() { sessionStorage.removeItem('loggedInUser'); window.location.href = 'landing.html'; }
+    function signOut() { localStorage.removeItem('loggedInUser'); localStorage.removeItem('currentProfileId'); window.location.href = 'landing.html'; }
   </script>
 </body>
 </html>

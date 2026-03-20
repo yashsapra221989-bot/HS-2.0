@@ -57,18 +57,9 @@ function savePatients(patients) {
 }
 
 // ─── 1. REGISTER USER ────────────────────────────────────────────────────────
-function registerUser(name, email, phone, password) {
-    const patients = getPatients();
-
+async function registerUser(name, email, phone, password) {
     if (!name || !email || !password) {
-        document.getElementById('globalError').textContent = 'Name, email and password are required.';
-        return;
-    }
-
-    // Check duplicate email
-    if (patients.find(p => p.email === email)) {
-        document.getElementById('globalError').textContent = 'Email already registered.';
-        return;
+        return { success: false, error: 'Name, email and password are required.' };
     }
 
     // Generate HS-YYYY-XXXX
@@ -76,60 +67,71 @@ function registerUser(name, email, phone, password) {
     const randomNum = Math.floor(1000 + Math.random() * 9000);
     const newId = `HS-${year}-${randomNum}`;
 
-    const newUser = {
-        id: newId,
-        account_id: newId,
-        name,
-        email,
-        phone,
-        password,
-        medComplete: false,
-        blood: '', dob: '', gender: '', weight: '', height: '', abha: '',
-        allergies: [], meds: [], conditions: [], surgeries: '',
-        ecName: '', ecRel: '', ecPhone: '', doctor: ''
-    };
-
-    patients.push(newUser);
-    savePatients(patients);
-
-    sessionStorage.setItem('loggedInUser', newId);
-    sessionStorage.setItem('currentProfileId', newId); // Set the default profile to self
-    showToast('Account created! Welcome to HealthSync.', 'success');
-
-    setTimeout(() => { window.location.href = 'sync.html'; }, 1200);
+    try {
+        const res = await fetch('/api/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_id: newId,
+                name: name,
+                password: password,
+                contact: phone
+            })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+            localStorage.setItem('loggedInUser', newId);
+            localStorage.setItem('currentProfileId', newId); // Set default profile
+            
+            // Show alert with the newly generated ID
+            alert(`Account created successfully!\n\nYour Patient ID is: ${newId}\nPlease use this ID or your registered email to log in next time.`);
+            showToast('Account created! Welcome to HealthSync.', 'success');
+            setTimeout(() => { window.location.href = 'sync.html'; }, 1000);
+            return { success: true };
+        } else {
+            return { success: false, error: data.error || 'Server rejected registration.' };
+        }
+    } catch (err) {
+        return { success: false, error: 'Could not connect to the server.' };
+    }
 }
 
 // ─── 2. LOGIN USER ───────────────────────────────────────────────────────────
-function userLogin(email, password) {
-    if (!email || !password) {
-        document.getElementById('globalError').textContent = 'Email and password are required.';
-        return;
+async function userLogin(userId, password) {
+    if (!userId || !password) {
+        return { success: false, error: 'Patient ID and password are required.' };
     }
 
-    const patients = getPatients();
-    const user = patients.find(p => p.email === email);
-
-    if (!user) {
-        document.getElementById('globalError').textContent = 'No account found with this email.';
-        return;
+    try {
+        const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: userId, password: password })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+            localStorage.setItem('loggedInUser', userId);
+            localStorage.setItem('currentProfileId', userId); // Default to self
+            showToast('Login successful! Redirecting…', 'success');
+            
+            // Redirect to sync to let them edit their profile, or qr if complete
+            setTimeout(() => { window.location.href = 'qr.html'; }, 1000);
+            return { success: true };
+        } else {
+            return { success: false, error: data.error || 'Invalid credentials.' };
+        }
+    } catch (err) {
+        return { success: false, error: 'Could not connect to the server.' };
     }
-    if (user.password !== password) {
-        document.getElementById('globalError').textContent = 'Incorrect password.';
-        return;
-    }
-
-    sessionStorage.setItem('loggedInUser', user.id);
-    sessionStorage.setItem('currentProfileId', user.id); // Default to self on login
-    showToast('Login successful! Redirecting…', 'success');
-
-    setTimeout(() => {
-        window.location.href = user.medComplete ? 'qr.html' : 'sync.html';
-    }, 1000);
 }
 
 // ─── 3. SAVE MEDICAL DATA TO LOCALSTORAGE ───────────────────────────────────
 function saveMedicalDataToLocal() {
-    const profileId = sessionStorage.getItem('currentProfileId');
+    const profileId = localStorage.getItem('currentProfileId');
     if (!profileId) return false;
 
     const patients = getPatients();
@@ -165,8 +167,8 @@ function saveMedicalDataToLocal() {
 
 // ─── 4. SAVE TO SERVER (NON-BLOCKING) ───────────────────────────────────────
 async function saveMedicalDataToServer() {
-    const profileId = sessionStorage.getItem('currentProfileId');
-    const accountId = sessionStorage.getItem('loggedInUser');
+    const profileId = localStorage.getItem('currentProfileId');
+    const accountId = localStorage.getItem('loggedInUser');
     if (!profileId || !accountId) return;
 
     const getValue = id => {
@@ -195,19 +197,21 @@ async function saveMedicalDataToServer() {
     };
 
     try {
-        await fetch('/api/save-medical-data', {
+        const res = await fetch('/api/save-medical-data', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
+        const data = await res.json();
+        return data.success;
     } catch (e) {
-        // Server save is non-critical; localStorage is source of truth
-        console.warn('[HealthSync] Server save skipped — continuing offline.');
+        console.error('[HealthSync] Server save failed:', e);
+        return false;
     }
 }
 
 // ─── 5. GENERATE QR (called from sync.html button) ──────────────────────────
-function generateQR() {
+async function generateQR() {
     // Validate required fields
     const name    = document.getElementById('name')    ? document.getElementById('name').value.trim()    : '';
     const blood   = document.getElementById('blood')   ? document.getElementById('blood').value.trim()   : '';
@@ -229,19 +233,25 @@ function generateQR() {
         btn.disabled = true;
     }
 
-    saveMedicalDataToLocal();
-    saveMedicalDataToServer(); // fire-and-forget
-
-    showToast('Profile saved! Generating QR…', 'success');
-
-    setTimeout(() => {
-        window.location.href = 'qr.html';
-    }, 900);
+    const success = await saveMedicalDataToServer();
+    
+    if (success) {
+        showToast('Profile saved! Generating QR…', 'success');
+        setTimeout(() => {
+            window.location.href = 'qr.html';
+        }, 900);
+    } else {
+        showToast('Could not save to server. Try again.', 'error');
+        if (btn) {
+            btn.textContent = 'Generate Emergency QR Card →';
+            btn.disabled = false;
+        }
+    }
 }
 
 // ─── 5.5 ADD FAMILY MEMBER ───────────────────────────────────────────────────
 async function createFamilyMember(name, relation) {
-    const accountId = sessionStorage.getItem('loggedInUser');
+    const accountId = localStorage.getItem('loggedInUser');
     if (!accountId) return null;
 
     const year = new Date().getFullYear();
