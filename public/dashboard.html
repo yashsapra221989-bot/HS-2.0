@@ -875,6 +875,34 @@
     .btn-admin-action.danger:hover { background: var(--red); color: white; border-color: var(--red); }
     .admin-empty { text-align: center; padding: 20px; color: #94a3b8; font-size: 0.85rem; }
 
+    /* ── BLOOD BANK PANEL ── */
+    .blood-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .blood-card {
+      background: #f8fafc;
+      border: 1px solid #e2eaf0;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: all 0.18s;
+    }
+    .blood-card:hover { border-color: var(--red); box-shadow: 0 4px 12px rgba(217,79,92,0.1); }
+    .blood-type { font-size: 1.5rem; font-weight: 700; color: var(--red); }
+    .blood-count { font-size: 0.8rem; color: var(--navy); font-weight: 600; }
+    .blood-empty { grid-column: 1 / -1; text-align: center; color: #94a3b8; padding: 20px; font-size: 0.85rem; }
+    .blood-chart-wrap { margin-top: 20px; padding: 16px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2eaf0; }
+    .blood-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 0.75rem; }
+    .blood-bar-label { width: 30px; font-weight: 600; color: var(--navy); }
+    .blood-bar-track { flex: 1; height: 8px; background: #e2eaf0; border-radius: 4px; overflow: hidden; }
+    .blood-bar-fill { height: 100%; background: var(--red); border-radius: 4px; transition: width 0.3s; }
+    .blood-bar-val { width: 24px; text-align: right; color: #64748b; }
+
     @media (max-width: 900px) {
       .sidebar { width: 60px; }
       .sidebar-logo, .sidebar-section-label, .nav-item span, .nav-item .badge { display: none; }
@@ -899,10 +927,7 @@
         <span>Dashboard</span>
         <span class="badge" id="sidebarPatientCount">0</span>
       </a>
-      <a href="#" class="nav-item" onclick="document.getElementById('searchInput').focus(); return false;">
-        <span class="nav-icon">🔍</span>
-        <span>Search</span>
-      </a>
+
       <a href="#" class="nav-item" onclick="openPanel('alertsPanel'); return false;">
         <span class="nav-icon">🚨</span>
         <span>Critical Alerts</span>
@@ -912,7 +937,7 @@
 
     <div class="sidebar-section-label">Reports</div>
     <nav class="sidebar-nav">
-      <a href="#" class="nav-item">
+      <a href="#" class="nav-item" onclick="openPanel('bloodBankPanel'); return false;">
         <span class="nav-icon">🩸</span>
         <span>Blood Bank</span>
       </a>
@@ -920,10 +945,6 @@
         <span class="nav-icon">💊</span>
         <span>Medications</span>
         <span class="badge" id="sidebarMedCount">0</span>
-      </a>
-      <a href="#" class="nav-item" onclick="exportExcel(); return false;">
-        <span class="nav-icon">📤</span>
-        <span>Export</span>
       </a>
     </nav>
 
@@ -1248,6 +1269,21 @@
         <div><strong>DB File:</strong> medical_data.db</div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ── BLOOD BANK PANEL ── -->
+  <div class="floating-panel" id="bloodBankPanel" style="width:480px;max-height:88vh">
+    <div class="panel-head">
+      <h3>🩸 Blood Bank Inventory</h3>
+      <button class="panel-close" onclick="closeAllPanels()">✕</button>
+    </div>
+    <div class="panel-body" style="padding:16px">
+      <div style="font-size:0.8rem; color:#64748b; margin-bottom:16px; line-height:1.5;">
+        Current inventory of registered patients by blood type.
+      </div>
+      <div class="blood-grid" id="bloodGrid"></div>
+      <div class="blood-chart-wrap" id="bloodChart"></div>
     </div>
   </div>
 
@@ -1706,6 +1742,45 @@
       showToast('Local patients cleared. MOCK data preserved.', 'info');
     }
 
+    // ── BLOOD BANK ─────────────────────────────────────────────────────────────
+    function renderBloodBank() {
+      const types = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+      const counts = {};
+      types.forEach(t => counts[t] = 0);
+
+      allPatients.forEach(p => {
+        const bt = p.blood ? p.blood.trim() : '';
+        if (bt && bt !== 'Unknown' && bt !== '-' && bt !== '') {
+          // Normalize (e.g. A+ve -> A+)
+          const normalizedbt = bt.replace('ve', '').replace(' ', '').toUpperCase();
+          if (counts[normalizedbt] !== undefined) {
+             counts[normalizedbt]++;
+          } else {
+             if(!counts['Other']) counts['Other'] = 0;
+             counts['Other']++;
+          }
+        }
+      });
+
+      const gridInfo = types.map(t => `<div class="blood-card"><div class="blood-type">${t}</div><div class="blood-count">${counts[t]} units</div></div>`).join('');
+      document.getElementById('bloodGrid').innerHTML = gridInfo;
+
+      const maxCount = Math.max(...Object.values(counts));
+      const chartHtml = types.map(t => {
+        const count = counts[t] || 0;
+        const width = maxCount > 0 ? (count / maxCount) * 100 : 0;
+        return `
+          <div class="blood-bar-row">
+            <div class="blood-bar-label">${t}</div>
+            <div class="blood-bar-track"><div class="blood-bar-fill" style="width:${width}%"></div></div>
+            <div class="blood-bar-val">${count}</div>
+          </div>
+        `;
+      }).join('');
+      
+      document.getElementById('bloodChart').innerHTML = `<div style="font-weight:600;font-size:0.75rem;margin-bottom:12px;color:var(--navy)">Distribution</div>` + chartHtml;
+    }
+
     // ── SETTINGS ─────────────────────────────────────────────────────────────
     const SETTINGS_KEY = 'hs_settings';
     function loadSettings() {
@@ -1752,6 +1827,7 @@
     function openPanel(id) {
       closeAllPanels();
       if (id === 'adminPanel') renderAdminPanel();
+      if (id === 'bloodBankPanel') renderBloodBank();
       document.getElementById(id).classList.add('active');
       document.getElementById('panelBackdrop').classList.add('active');
     }
