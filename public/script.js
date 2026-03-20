@@ -242,21 +242,24 @@ async function renderQRCodeOnPage(containerId, patientId) {
     qrContainer.innerHTML = '';
     let url = window.location.origin + '/viewer.html?id=' + encodeURIComponent(patientId);
 
-    // Fetch the proper local network IP from the server
-    try {
-        const res = await fetch('/api/generate-qr-url', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: patientId })
-        });
-        if (res.ok) {
-            const data = await res.json();
-            if (data.success && data.qr_url) {
-                url = data.qr_url;
+    // Fetch the proper local network IP from the server ONLY if on localhost.
+    // Otherwise, we keep window.location.origin (which works for ngrok!).
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        try {
+            const res = await fetch('/api/generate-qr-url', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: patientId })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success && data.qr_url) {
+                    url = data.qr_url;
+                }
             }
+        } catch (e) {
+            console.warn('Could not fetch network IP, using window.location.origin instead.');
         }
-    } catch (e) {
-        console.warn('Could not fetch network IP, using window.location.origin instead.');
     }
 
     new QRCode(qrContainer, {
