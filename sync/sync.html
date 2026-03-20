@@ -1,0 +1,388 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Emergency QR Medical ID</title>
+<style>
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    background: linear-gradient(to bottom, #ffffff 0%, #f8f9ff 100%);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 450px;
+    width: 100%;
+    animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+h2 {
+    text-align: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 30px;
+    font-size: 28px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    animation: fadeIn 0.6s ease-out forwards;
+    opacity: 0;
+}
+
+.form-group:nth-child(1) { animation-delay: 0.1s; }
+.form-group:nth-child(2) { animation-delay: 0.2s; }
+.form-group:nth-child(3) { animation-delay: 0.3s; }
+.form-group:nth-child(4) { animation-delay: 0.4s; }
+.form-group:nth-child(5) { animation-delay: 0.5s; }
+.form-group:nth-child(6) { animation-delay: 0.6s; }
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+    background-color: #f8f9ff;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: #667eea;
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+button {
+    padding: 14px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    margin-top: 15px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+#qrcode {
+    text-align: center;
+    margin-top: 30px;
+    padding: 20px;
+    background-color: rgba(102, 126, 234, 0.05);
+    border-radius: 10px;
+    animation: fadeIn 0.6s ease-out;
+}
+
+#cameraContainer {
+    text-align: center;
+    background-color: #f0f0f0;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+#cameraContainer video {
+    border: 3px solid #667eea;
+    border-radius: 10px;
+    margin-top: 10px;
+    display: block !important;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    transition: transform 0.3s ease;
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    background-color: black;
+}
+
+#cameraContainer video:hover {
+    transform: scale(1.02);
+}
+
+#photo {
+    border: 3px solid #667eea;
+    border-radius: 10px;
+    margin-top: 10px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    animation: fadeIn 0.5s ease-out;
+}
+
+#captureBtn {
+    background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+    margin-top: 10px;
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+}
+
+#captureBtn:hover {
+    box-shadow: 0 6px 20px rgba(33, 150, 243, 0.6);
+}
+
+#retakeBtn {
+    background: linear-gradient(135deg, #ff9800 0%, #ff6f00 100%);
+    margin-top: 10px;
+    box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+}
+
+#retakeBtn:hover {
+    box-shadow: 0 6px 20px rgba(255, 152, 0, 0.6);
+}
+
+/* Toast Notification Styles */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    animation: slideInRight 0.4s ease-out;
+    z-index: 1000;
+    font-weight: 500;
+}
+
+.toast.success {
+    background: linear-gradient(135deg, #00c853 0%, #00acc1 100%);
+}
+
+.toast.error {
+    background: linear-gradient(135deg, #ff5252 0%, #ff6e40 100%);
+}
+
+.toast.warning {
+    background: linear-gradient(135deg, #ffa726 0%, #ff7043 100%);
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+.toast.hide {
+    animation: slideOutRight 0.4s ease-out forwards;
+}
+
+/* Progress Indicator */
+.progress-bar {
+    width: 100%;
+    height: 3px;
+    background-color: #e0e0e0;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+/* Input validation indicators */
+input.valid {
+    border-color: #00c853 !important;
+    box-shadow: 0 0 0 3px rgba(0, 200, 83, 0.1) !important;
+}
+
+input.invalid {
+    border-color: #ff5252 !important;
+    box-shadow: 0 0 0 3px rgba(255, 82, 82, 0.1) !important;
+}
+
+.field-status {
+    font-size: 12px;
+    margin-top: 4px;
+    display: none;
+    font-weight: 500;
+}
+
+.field-status.valid {
+    color: #00c853;
+    display: block;
+}
+
+.field-status.invalid {
+    color: #ff5252;
+    display: block;
+}
+
+/* Loading spinner */
+.spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 10px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Button loading state */
+button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Photo status badge */
+.photo-status-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: #00c853;
+    color: white;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 10px;
+    animation: fadeIn 0.5s ease-out;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+<h2>Emergency QR Medical ID</h2>
+
+<form id="medicalForm">
+<div class="progress-bar">
+    <div class="progress-bar-fill" id="progressBar"></div>
+</div>
+
+<div class="form-group">
+<label for="name">Name:</label>
+<input type="text" id="name" placeholder="Enter your full name" required>
+<div class="field-status" id="nameStatus"></div>
+</div>
+
+<div class="form-group">
+<label for="blood">Blood Group:</label>
+<input type="text" id="blood" placeholder="e.g., O+, A-, etc.">
+<div class="field-status" id="bloodStatus"></div>
+</div>
+
+<div class="form-group">
+<label for="allergy">Allergies:</label>
+<input type="text" id="allergy" placeholder="List any allergies">
+<div class="field-status" id="allergyStatus"></div>
+</div>
+
+<div class="form-group">
+<label for="condition">Medical Condition:</label>
+<input type="text" id="condition" placeholder="Any medical conditions">
+<div class="field-status" id="conditionStatus"></div>
+</div>
+
+<div class="form-group">
+<label for="contact">Emergency Contact:</label>
+<input type="text" id="contact" placeholder="Name and phone number">
+<div class="field-status" id="contactStatus"></div>
+</div>
+
+<div class="form-group">
+<label>Capture Photo:</label>
+<div id="cameraContainer">
+    <video id="video" width="300" height="225" autoplay muted playsinline></video>
+    <canvas id="canvas" width="300" height="225" style="display:none;"></canvas>
+    <br>
+    <button type="button" id="captureBtn" style="display:none;">Capture Photo</button>
+    <button type="button" id="retakeBtn" style="display:none;" onclick="retakePhoto()">Retake Photo</button>
+</div>
+<img id="photo" style="max-width: 300px; display:none;">
+<div id="photoStatus"></div>
+</div>
+
+<button type="button" id="generateBtn" onclick="generateQR()">Generate QR Code</button>
+</form>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>

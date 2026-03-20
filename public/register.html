@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HealthSync — Create Account</title>
+  <meta name="description" content="Create your HealthSync account to generate your emergency medical QR card."/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #06080f;
+      --surface: #0d1117;
+      --surface2: #161b27;
+      --surface3: #1e2535;
+      --border: #232d42;
+      --accent: #00c8ff;
+      --accent-dim: rgba(0,200,255,0.12);
+      --green: #00e5a0;
+      --red: #ff4757;
+      --text: #e8edf5;
+      --text2: #8892a4;
+      --text3: #4a5568;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Grid background */
+    .grid-bg {
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none; z-index: 0;
+    }
+
+    /* Scan line */
+    .scanline {
+      position: fixed; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, var(--accent) 50%, transparent 100%);
+      opacity: 0.12; z-index: 1;
+      animation: scanSweep 8s linear infinite;
+    }
+    @keyframes scanSweep { from { top: -2px; } to { top: 100vh; } }
+
+    /* Nav */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 40px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(6,8,15,0.85);
+      backdrop-filter: blur(20px);
+      z-index: 100;
+    }
+    .nav-logo {
+      font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.3rem;
+      letter-spacing: -0.5px; color: var(--text); text-decoration: none;
+    }
+    .nav-logo span { color: var(--accent); }
+    .nav-back {
+      font-size: 0.82rem; color: var(--text2);
+      text-decoration: none; font-family: 'DM Mono', monospace;
+      display: flex; align-items: center; gap: 6px;
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 7px 14px; transition: all 0.2s;
+    }
+    .nav-back:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Page wrapper */
+    .page-center {
+      position: relative; z-index: 10;
+      width: 100%; max-width: 960px;
+      padding: 24px;
+      animation: wrapIn 0.7s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes wrapIn {
+      from { opacity: 0; transform: translateY(40px) scale(0.96); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Card ring */
+    .card-ring {
+      padding: 1.5px; border-radius: 22px;
+      background: linear-gradient(135deg, var(--accent), #a78bfa, #ff6b35, var(--accent));
+      background-size: 300% 300%;
+      animation: ringShift 6s ease infinite;
+      box-shadow: 0 0 50px rgba(0,200,255,0.08), 0 40px 90px rgba(0,0,0,0.6);
+    }
+    @keyframes ringShift {
+      0%,100% { background-position: 0% 50%; }
+      50%      { background-position: 100% 50%; }
+    }
+
+    .card {
+      display: grid;
+      grid-template-columns: 1fr 1.6fr;
+      border-radius: 21px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    /* LEFT: Brand panel */
+    .brand-panel {
+      background: linear-gradient(160deg, #0a1929 0%, #050c16 60%, #0d0522 100%);
+      padding: 52px 36px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+      border-right: 1px solid var(--border);
+    }
+    .brand-panel::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,200,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,200,255,0.04) 1px, transparent 1px);
+      background-size: 36px 36px;
+      animation: gridDrift 20s linear infinite;
+    }
+    @keyframes gridDrift {
+      from { background-position: 0 0; }
+      to   { background-position: 36px 36px; }
+    }
+    .brand-glow {
+      position: absolute; width: 260px; height: 260px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,200,255,0.1) 0%, transparent 70%);
+      top: 50%; left: 50%; transform: translate(-50%,-50%);
+      z-index: 0; animation: glowPulse 4s ease-in-out infinite;
+    }
+    @keyframes glowPulse {
+      0%,100% { opacity: 0.6; transform: translate(-50%,-50%) scale(1); }
+      50%      { opacity: 1;   transform: translate(-50%,-50%) scale(1.15); }
+    }
+    .brand-content { position: relative; z-index: 1; text-align: center; }
+
+    .logo-badge {
+      width: 72px; height: 72px; border-radius: 20px;
+      background: linear-gradient(135deg, #0d2b40, #1a0d3d);
+      border: 1.5px solid rgba(0,200,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; margin: 0 auto 18px;
+      box-shadow: 0 0 40px rgba(0,200,255,0.2);
+    }
+    .brand-title {
+      font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; line-height: 1.25;
+      background: linear-gradient(135deg, var(--accent), var(--green));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 8px;
+    }
+    .brand-sub {
+      font-family: 'DM Mono', monospace; font-size: 0.68rem; font-weight: 500;
+      color: var(--text3); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 32px;
+    }
+
+    .steps-list {
+      display: flex; flex-direction: column; gap: 14px;
+      width: 100%; max-width: 200px; text-align: left;
+    }
+    .step-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-family: 'DM Mono', monospace; font-size: 0.73rem;
+      color: var(--text2);
+    }
+    .step-num-small {
+      min-width: 20px; height: 20px; border-radius: 50%;
+      background: var(--accent-dim); border: 1px solid rgba(0,200,255,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; color: var(--accent); font-weight: 700;
+    }
+    .step-item-text { flex: 1; line-height: 1.45; }
+
+    .login-link-wrap {
+      margin-top: 28px;
+      font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--text3);
+    }
+    .login-link-wrap a { color: var(--accent); text-decoration: none; }
+    .login-link-wrap a:hover { text-decoration: underline; }
+
+    /* RIGHT: Form */
+    .form-panel {
+      padding: 48px 44px 40px;
+      display: flex; flex-direction: column; justify-content: flex-start;
+      background: var(--surface);
+      overflow-y: auto; max-height: calc(100vh - 100px);
+    }
+
+    .form-header { margin-bottom: 28px; }
+    .form-header h2 {
+      font-family: 'Syne', sans-serif; font-size: 1.65rem; font-weight: 800;
+      letter-spacing: -0.5px; color: var(--text); margin-bottom: 6px;
+    }
+    .form-header p { font-size: 0.86rem; color: var(--text2); font-weight: 300; }
+
+    /* Section dividers */
+    .section-divider {
+      display: flex; align-items: center; gap: 10px;
+      margin: 22px 0 16px;
+    }
+    .section-divider::before, .section-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+    .section-divider span {
+      font-family: 'DM Mono', monospace; font-size: 0.65rem;
+      letter-spacing: 2px; text-transform: uppercase; color: var(--accent);
+      white-space: nowrap;
+    }
+
+    /* Form groups */
+    .form-group { margin-bottom: 16px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    label {
+      display: block; font-size: 0.7rem; font-family: 'DM Mono', monospace;
+      letter-spacing: 0.8px; color: var(--accent); text-transform: uppercase; margin-bottom: 8px;
+    }
+
+    .input-wrap { position: relative; }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    input[type="tel"] {
+      width: 100%;
+      padding: 12px 16px 12px 42px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; font-size: 0.88rem;
+      font-family: 'DM Sans', sans-serif; color: var(--text);
+      outline: none; transition: all 0.22s; caret-color: var(--accent);
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    input::placeholder { color: var(--text3); font-weight: 400; }
+    input:focus {
+      background: var(--surface3); border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0,200,255,0.08);
+    }
+    input.error-field {
+      border-color: var(--red) !important;
+      box-shadow: 0 0 0 3px rgba(255,71,87,0.1) !important;
+    }
+    input.valid-field {
+      border-color: rgba(0,229,160,0.5) !important;
+    }
+
+    .input-icon {
+      position: absolute; left: 13px; top: 50%;
+      transform: translateY(-50%); font-size: 0.95rem;
+      opacity: 0.4; pointer-events: none;
+    }
+    .toggle-pw {
+      position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; font-size: 0.95rem;
+      opacity: 0.38; color: var(--text); transition: opacity 0.2s; padding: 4px;
+    }
+    .toggle-pw:hover { opacity: 0.85; }
+
+    .field-error {
+      display: block; font-size: 0.7rem; font-family: 'DM Mono', monospace;
+      color: var(--red); margin-top: 5px; min-height: 14px;
+    }
+    .field-success {
+      display: block; font-size: 0.7rem; font-family: 'DM Mono', monospace;
+      color: var(--green); margin-top: 5px; min-height: 14px;
+    }
+
+    /* Global error bar */
+    #globalError {
+      background: rgba(255,71,87,0.08); border: 1px solid rgba(255,71,87,0.25);
+      color: #ff6b87; border-radius: 9px; padding: 10px 14px;
+      font-size: 0.77rem; font-family: 'DM Mono', monospace; font-weight: 600;
+      margin-bottom: 16px; display: none; animation: shake 0.35s ease;
+    }
+    @keyframes shake { 0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);} }
+
+    /* Password strength */
+    .pw-strength-wrap { margin-top: 8px; }
+    .pw-strength-bar {
+      height: 3px; border-radius: 2px; background: var(--border);
+      overflow: hidden;
+    }
+    .pw-strength-fill {
+      height: 100%; border-radius: 2px; width: 0%;
+      transition: all 0.3s ease; background: var(--red);
+    }
+    .pw-strength-label {
+      font-size: 0.67rem; font-family: 'DM Mono', monospace;
+      color: var(--text3); margin-top: 4px;
+    }
+
+    /* Submit button */
+    .btn-register {
+      width: 100%; padding: 13px 20px;
+      background: var(--accent); color: var(--bg);
+      border: none; border-radius: 11px;
+      font-family: 'Syne', sans-serif; font-size: 0.93rem; font-weight: 700;
+      cursor: pointer; transition: all 0.22s; letter-spacing: 0.3px;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      position: relative; overflow: hidden; margin-top: 24px;
+    }
+    .btn-register::after {
+      content: ''; position: absolute; top: 0; left: -100%;
+      width: 60%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+    .btn-register:hover:not(:disabled)::after { left: 150%; }
+    .btn-register:hover:not(:disabled) {
+      background: #33d4ff; transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(0,200,255,0.28);
+    }
+    .btn-register:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .spinner {
+      width: 15px; height: 15px; border: 2px solid rgba(0,0,0,0.2);
+      border-top-color: var(--bg); border-radius: 50%;
+      animation: spin 0.7s linear infinite; display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Terms note */
+    .terms-note {
+      margin-top: 12px; text-align: center;
+      font-size: 0.72rem; font-family: 'DM Mono', monospace; color: var(--text3);
+    }
+
+    /* ── Success overlay ── */
+    #successOverlay {
+      position: fixed; inset: 0;
+      background: rgba(6,8,15,0.88); backdrop-filter: blur(12px);
+      display: none; align-items: center; justify-content: center; z-index: 999;
+    }
+    #successOverlay.show { display: flex; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .success-card {
+      background: var(--surface); border: 1px solid rgba(0,229,160,0.25);
+      border-radius: 22px; padding: 52px 56px; text-align: center;
+      box-shadow: 0 0 60px rgba(0,200,255,0.1), 0 40px 80px rgba(0,0,0,0.55);
+      animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+      max-width: 380px; width: 90%;
+    }
+    @keyframes popIn { from{transform:scale(0.7);opacity:0;} to{transform:scale(1);opacity:1;} }
+    .success-ring {
+      width: 76px; height: 76px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--green));
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 18px; font-size: 1.9rem; color: var(--bg);
+      box-shadow: 0 0 40px rgba(0,229,160,0.4);
+    }
+    .success-card h2 {
+      font-family: 'Syne', sans-serif; font-size: 1.35rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--green));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 10px;
+    }
+    .success-card p { color: var(--text2); font-size: 0.84rem; line-height: 1.65; margin-bottom: 28px; }
+    .success-id-box {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 16px;
+      font-family: 'DM Mono', monospace; font-size: 0.78rem;
+      color: var(--accent); margin-bottom: 24px; word-break: break-all;
+    }
+    .btn-go-login {
+      display: inline-block; padding: 12px 28px;
+      background: var(--accent); color: var(--bg);
+      border: none; border-radius: 10px;
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.9rem;
+      cursor: pointer; transition: all 0.2s; text-decoration: none;
+    }
+    .btn-go-login:hover { background: #33d4ff; transform: translateY(-2px); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--surface); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* Responsive */
+    @media (max-width: 720px) {
+      .card { grid-template-columns: 1fr; }
+      .brand-panel { padding: 32px 24px 24px; border-right: none; border-bottom: 1px solid var(--border); }
+      .form-panel { padding: 32px 24px 28px; max-height: none; overflow: visible; }
+      nav { padding: 14px 20px; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+  <div class="scanline"></div>
+
+  <!-- Nav -->
+  <nav>
+    <a href="landing.html" class="nav-logo">Health<span>Sync</span></a>
+    <a href="index.html" class="nav-back">← Sign In</a>
+  </nav>
+
+  <!-- Success overlay -->
+  <div id="successOverlay">
+    <div class="success-card">
+      <div class="success-ring">✓</div>
+      <h2>Account Created!</h2>
+      <p>Your HealthSync account is ready.<br>Your unique User ID is:</p>
+      <div class="success-id-box" id="createdUserId">—</div>
+      <p style="margin-bottom:20px; color: var(--text3); font-size:0.78rem;">
+        📋 Save this ID. Next, please fill out your emergency medical profile.
+      </p>
+      <a href="sync.html" class="btn-go-login">Continue to Medical Profile →</a>
+    </div>
+  </div>
+
+  <!-- Main card -->
+  <div class="page-center">
+    <div class="card-ring">
+      <div class="card">
+
+        <!-- LEFT: Branding/steps -->
+        <div class="brand-panel">
+          <div class="brand-glow"></div>
+          <div class="brand-content">
+            <div class="logo-badge">🏥</div>
+            <div class="brand-title">Create Your<br>Medical ID</div>
+            <div class="brand-sub">Emergency QR System</div>
+
+            <div class="steps-list">
+              <div class="step-item">
+                <div class="step-num-small">1</div>
+                <div class="step-item-text">Fill in your account &amp; medical details</div>
+              </div>
+              <div class="step-item">
+                <div class="step-num-small">2</div>
+                <div class="step-item-text">Your data is stored securely in our database</div>
+              </div>
+              <div class="step-item">
+                <div class="step-num-small">3</div>
+                <div class="step-item-text">Generate your emergency QR card instantly</div>
+              </div>
+              <div class="step-item">
+                <div class="step-num-small">4</div>
+                <div class="step-item-text">First responders scan — no app needed</div>
+              </div>
+            </div>
+
+            <div class="login-link-wrap">
+              Already have an account? <a href="index.html">Sign In</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Form -->
+        <div class="form-panel">
+          <div class="form-header">
+            <h2>Create Account</h2>
+            <p>Register to get your personal emergency medical QR card</p>
+          </div>
+
+          <!-- Global error -->
+          <div id="globalError"></div>
+
+          <form id="registerForm" novalidate>
+
+            <!-- ── Account Section ── -->
+            <div class="section-divider"><span>Account</span></div>
+
+            <div class="form-group">
+              <label for="regName">Full Name *</label>
+              <div class="input-wrap">
+                <input type="text" id="regName" placeholder="e.g. Arjun Sharma" autocomplete="name" required/>
+                <span class="input-icon">👤</span>
+              </div>
+              <span class="field-error" id="regNameError"></span>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="regUserId">User ID *</label>
+                <div class="input-wrap">
+                  <input type="text" id="regUserId" placeholder="e.g. arjun_2025" autocomplete="username" required/>
+                  <span class="input-icon">🪪</span>
+                </div>
+                <span class="field-error" id="regUserIdError"></span>
+              </div>
+
+              <div class="form-group">
+                <label for="regPassword">Password *</label>
+                <div class="input-wrap">
+                  <input type="password" id="regPassword" placeholder="Min 6 characters" autocomplete="new-password" required/>
+                  <span class="input-icon">🔒</span>
+                  <button type="button" class="toggle-pw" id="togglePw1">👁️</button>
+                </div>
+                <div class="pw-strength-wrap">
+                  <div class="pw-strength-bar"><div class="pw-strength-fill" id="pwStrengthFill"></div></div>
+                  <div class="pw-strength-label" id="pwStrengthLabel"></div>
+                </div>
+                <span class="field-error" id="regPasswordError"></span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="regConfirm">Confirm Password *</label>
+              <div class="input-wrap">
+                <input type="password" id="regConfirm" placeholder="Repeat your password" autocomplete="new-password" required/>
+                <span class="input-icon">🔐</span>
+                <button type="button" class="toggle-pw" id="togglePw2">👁️</button>
+              </div>
+              <span class="field-error" id="regConfirmError"></span>
+            </div>
+
+
+            <!-- Submit -->
+            <button type="submit" class="btn-register" id="registerBtn">
+              <div class="spinner" id="spinner"></div>
+              <span id="btnText">Create Account &nbsp;→</span>
+            </button>
+
+            <p class="terms-note">
+              By creating an account, your data is stored securely and used only for emergency medical identification.
+            </p>
+
+          </form>
+        </div>
+
+      </div><!-- .card -->
+    </div><!-- .card-ring -->
+  </div>
+
+  <script>
+    /* ── Password toggle ── */
+    function setupToggle(btnId, inputId) {
+      document.getElementById(btnId).addEventListener('click', () => {
+        const inp = document.getElementById(inputId);
+        const btn = document.getElementById(btnId);
+        const show = inp.type === 'password';
+        inp.type = show ? 'text' : 'password';
+        btn.textContent = show ? '🙈' : '👁️';
+      });
+    }
+    setupToggle('togglePw1', 'regPassword');
+    setupToggle('togglePw2', 'regConfirm');
+
+    /* ── Password strength ── */
+    document.getElementById('regPassword').addEventListener('input', () => {
+      const pw = document.getElementById('regPassword').value;
+      const fill = document.getElementById('pwStrengthFill');
+      const label = document.getElementById('pwStrengthLabel');
+      let strength = 0;
+      if (pw.length >= 6) strength++;
+      if (pw.length >= 10) strength++;
+      if (/[A-Z]/.test(pw)) strength++;
+      if (/[0-9]/.test(pw)) strength++;
+      if (/[^A-Za-z0-9]/.test(pw)) strength++;
+      const pct = Math.min(100, strength * 20);
+      const colors = ['', '#ff4757', '#ffd32a', '#ffd32a', '#00e5a0', '#00e5a0'];
+      const labels = ['', '// WEAK', '// FAIR', '// FAIR', '// STRONG', '// VERY STRONG'];
+      fill.style.width = pct + '%';
+      fill.style.background = colors[strength] || '';
+      label.textContent = pw ? labels[strength] || '' : '';
+      label.style.color = colors[strength] || '';
+    });
+
+    /* ── Field helpers ── */
+    function fieldOk(id)  { document.getElementById(id).classList.add('valid-field'); document.getElementById(id).classList.remove('error-field'); }
+    function fieldErr(id) { document.getElementById(id).classList.add('error-field'); document.getElementById(id).classList.remove('valid-field'); }
+    function showErr(errId, msg)  { document.getElementById(errId).textContent = msg; }
+    function clearErr(errId)      { document.getElementById(errId).textContent = ''; }
+
+    ['regName','regUserId','regPassword','regConfirm'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        clearErr(id + 'Error');
+        document.getElementById(id).classList.remove('error-field');
+        document.getElementById('globalError').style.display = 'none';
+      });
+    });
+
+    /* ── Submit ── */
+    document.getElementById('registerForm').addEventListener('submit', async e => {
+      e.preventDefault();
+
+      const name     = document.getElementById('regName').value.trim();
+      const userId   = document.getElementById('regUserId').value.trim();
+      const password = document.getElementById('regPassword').value;
+      const confirm  = document.getElementById('regConfirm').value;
+
+      const globalEl = document.getElementById('globalError');
+      globalEl.style.display = 'none';
+      ['regName','regUserId','regPassword','regConfirm'].forEach(id => clearErr(id + 'Error'));
+
+      // Validation
+      let valid = true;
+      if (!name)               { showErr('regNameError', '// ERR: Full name is required'); fieldErr('regName'); valid = false; }
+      if (userId.length < 3)   { showErr('regUserIdError', '// ERR: User ID must be at least 3 characters'); fieldErr('regUserId'); valid = false; }
+      if (/\s/.test(userId))   { showErr('regUserIdError', '// ERR: User ID cannot contain spaces'); fieldErr('regUserId'); valid = false; }
+      if (password.length < 6) { showErr('regPasswordError', '// ERR: Password must be min 6 characters'); fieldErr('regPassword'); valid = false; }
+      if (password !== confirm) { showErr('regConfirmError', '// ERR: Passwords do not match'); fieldErr('regConfirm'); valid = false; }
+      if (!valid) return;
+
+      // UI: loading state
+      const btn     = document.getElementById('registerBtn');
+      const spinner = document.getElementById('spinner');
+      const btnText = document.getElementById('btnText');
+      btn.disabled          = true;
+      spinner.style.display = 'block';
+      btnText.textContent   = 'Creating account…';
+
+      try {
+        // Call /api/register — atomically checks uniqueness & saves credentials + medical data
+        const payload = {
+          user_id:   userId,
+          password:  password,
+          name:      name
+        };
+
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          // Store in localStorage for prototype login compatibility
+          localStorage.setItem('userId', userId);
+          sessionStorage.setItem('loggedInUser', userId); // automatically log them in
+          localStorage.setItem('medicalData', JSON.stringify({ name: name }));
+
+          // Show success overlay
+          document.getElementById('createdUserId').textContent = userId;
+          document.getElementById('successOverlay').classList.add('show');
+        } else {
+          // Handle specific errors
+          if (res.status === 409 || (data.error && data.error.toLowerCase().includes('taken'))) {
+            showErr('regUserIdError', '// ERR: This User ID is already taken, choose another');
+            fieldErr('regUserId');
+            resetBtn();
+            return;
+          }
+          throw new Error(data.error || 'Registration failed');
+        }
+
+      } catch (err) {
+        globalEl.textContent = `// ERR: ${err.message || 'Could not connect to server. Make sure the Flask server is running.'}`;
+        globalEl.style.display = 'block';
+        resetBtn();
+      }
+
+      function resetBtn() {
+        btn.disabled          = false;
+        spinner.style.display = 'none';
+        btnText.textContent   = 'Create Account \u00a0→';
+      }
+    });
+  </script>
+</body>
+</html>

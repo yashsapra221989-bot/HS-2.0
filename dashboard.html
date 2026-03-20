@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hospital Dashboard — HealthSync</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #06080f; --surface: #0d1117; --surface2: #161b27; --surface3: #1e2535;
+      --border: #232d42; --accent: #00c8ff; --green: #00e5a0; --red: #ff4757; --amber: #ffd32a;
+      --text: #e8edf5; --text2: #8892a4; --text3: #4a5568;
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
+    .grid-bg { position: fixed; inset: 0; background-image: linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+
+    nav { position: relative; z-index: 10; display: flex; justify-content: space-between; align-items: center; background: rgba(13,17,23,0.8); backdrop-filter: blur(10px); padding: 16px 32px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 24px; }
+    .nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem; color: var(--text); text-decoration: none; }
+    .nav-logo span { color: var(--accent); }
+    .nav-btn { background: none; border: 1px solid var(--border); color: var(--text2); padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.2s; font-family: 'DM Sans', sans-serif; }
+    .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .dashboard-container { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; }
+
+    .header-panel { margin-bottom: 32px; }
+    .header-panel h1 { font-family: 'Syne', sans-serif; font-size: 2rem; margin-bottom: 8px; }
+    .header-panel p { color: var(--text2); }
+
+    /* Stats Grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 32px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+    .stat-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
+    .stat-card.c-blue::before { background: var(--accent); }
+    .stat-card.c-red::before { background: var(--red); }
+    .stat-card.c-amber::before { background: var(--amber); }
+    .stat-card.c-green::before { background: var(--green); }
+
+    .stat-title { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--text3); text-transform: uppercase; margin-bottom: 12px; }
+    .stat-val { font-family: 'Syne', sans-serif; font-size: 2.5rem; font-weight: 800; }
+
+    /* Table */
+    .table-container { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+    .table-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .table-header h3 { font-family: 'Syne', sans-serif; font-size: 1.2rem; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 16px 24px; font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--text2); text-transform: uppercase; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    td { padding: 16px 24px; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .tag { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-family: 'DM Mono', monospace; }
+    .tag.red { background: rgba(255,71,87,0.1); color: var(--red); }
+    .tag.green { background: rgba(0,229,160,0.1); color: var(--green); }
+    .tag.gray { background: var(--surface3); color: var(--text2); }
+
+    .btn-view { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(0,200,255,0.2); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600; }
+    .btn-view:hover { background: var(--accent); color: var(--bg); }
+
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; }
+    .modal-overlay.active { display: flex; }
+    .modal-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; width: 100%; max-width: 500px; padding: 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+    .modal-card h3 { font-family: 'Syne', sans-serif; font-size: 1.5rem; margin-bottom: 20px; color: var(--accent); }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    .m-label { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--text3); text-transform: uppercase; margin-bottom: 4px; }
+    .m-val { font-size: 0.95rem; }
+    .m-full { grid-column: 1 / -1; }
+    .close-btn { width: 100%; padding: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; color: var(--text); cursor: pointer; transition: 0.2s; }
+    .close-btn:hover { background: var(--surface3); }
+
+    @media (max-width: 800px) { th, td { padding: 12px 16px; } .hide-mobile { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+
+  <nav>
+    <a href="index.html" class="nav-logo">Health<span>Sync</span> Dashboard</a>
+    <button class="nav-btn" onclick="window.location.href='login.html?role=hospital'">Sign Out</button>
+  </nav>
+
+  <div class="dashboard-container">
+    <div class="header-panel">
+      <h1>Hospital Analytics</h1>
+      <p>Real-time overview of registered emergency profiles</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card c-blue">
+        <div class="stat-title">Total Patients</div>
+        <div class="stat-val" id="statTotal">--</div>
+      </div>
+      <div class="stat-card c-red">
+        <div class="stat-title">O+ Blood Group</div>
+        <div class="stat-val" id="statBlood">--</div>
+      </div>
+      <div class="stat-card c-amber">
+        <div class="stat-title">Patients with Allergies</div>
+        <div class="stat-val" id="statAllergies">--</div>
+      </div>
+      <div class="stat-card c-green">
+        <div class="stat-title">Patients w/ Conditions</div>
+        <div class="stat-val" id="statConds">--</div>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <div class="table-header">
+        <h3>Patient Directory</h3>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Patient ID</th>
+            <th>Name</th>
+            <th class="hide-mobile">Blood Group</th>
+            <th class="hide-mobile">Risk Factors</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="patientTableBody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="patientModal">
+    <div class="modal-card">
+      <h3 id="mName">Patient Details</h3>
+      <div class="modal-grid">
+        <div><div class="m-label">Patient ID</div><div class="m-val" id="mId"></div></div>
+        <div><div class="m-label">Blood Group</div><div class="m-val" id="mBlood"></div></div>
+        <div class="m-full"><div class="m-label">Allergies</div><div class="m-val" id="mAllergies"></div></div>
+        <div class="m-full"><div class="m-label">Medical Conditions</div><div class="m-val" id="mConds"></div></div>
+        <div><div class="m-label">Emergency Phone</div><div class="m-val" id="mPhone"></div></div>
+      </div>
+      <button class="close-btn" onclick="document.getElementById('patientModal').classList.remove('active')">Close Details</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    const MOCK = [
+      { id: 'HS-2023-8492', name: 'Arjun Sharma', blood: 'O+', allergies: ['Penicillin'], conditions: ['Hypertension'], ecPhone: '+91 9876543210' },
+      { id: 'HS-2023-9184', name: 'Priya Patel', blood: 'B-', allergies: [], conditions: ['Asthma'], ecPhone: '+91 9876500000' }
+    ];
+
+    let mergedPatients = [];
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // Pull and merge
+      const localP = getPatients().filter(p => p.medComplete); // Only fully registered
+      mergedPatients = [...MOCK, ...localP];
+
+      // Calculate Stats
+      document.getElementById('statTotal').textContent = mergedPatients.length;
+      document.getElementById('statBlood').textContent = mergedPatients.filter(p => p.blood === 'O+').length;
+      document.getElementById('statAllergies').textContent = mergedPatients.filter(p => p.allergies && p.allergies.length > 0).length;
+      document.getElementById('statConds').textContent = mergedPatients.filter(p => p.conditions && p.conditions.length > 0).length;
+
+      // Render Table
+      const tbody = document.getElementById('patientTableBody');
+      tbody.innerHTML = '';
+      
+      mergedPatients.forEach((p, idx) => {
+        const tr = document.createElement('tr');
+        
+        const hasRisk = (p.allergies && p.allergies.length > 0) || (p.conditions && p.conditions.length > 0);
+        const riskBadge = hasRisk ? '<span class="tag red">High Risk</span>' : '<span class="tag green">Standard</span>';
+        
+        const blood = p.blood || 'Unknown';
+
+        tr.innerHTML = `
+          <td><span class="tag gray">${p.id}</span></td>
+          <td style="font-weight:600">${p.name || 'Unknown'}</td>
+          <td class="hide-mobile">${blood}</td>
+          <td class="hide-mobile">${riskBadge}</td>
+          <td><button class="btn-view" onclick="viewPatient(${idx})">View</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    });
+
+    function viewPatient(idx) {
+      const p = mergedPatients[idx];
+      document.getElementById('mName').textContent = p.name || 'Unknown';
+      document.getElementById('mId').textContent = p.id;
+      document.getElementById('mBlood').textContent = p.blood || 'N/A';
+      
+      const parts = arr => (arr && arr.length) ? arr.join(', ') : 'None registered';
+      document.getElementById('mAllergies').textContent = parts(p.allergies);
+      document.getElementById('mConds').textContent = parts(p.conditions);
+      
+      document.getElementById('mPhone').textContent = p.ecPhone || p.phone || 'N/A';
+
+      document.getElementById('patientModal').classList.add('active');
+    }
+  </script>
+</body>
+</html>

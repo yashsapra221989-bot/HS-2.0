@@ -1,0 +1,319 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Emergency QR Medical ID</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #2d5a3d 0%, #5a9b6f 100%);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    background: linear-gradient(to bottom, #faf8f5 0%, #f5f3f0 100%);
+    padding: 50px 45px;
+    border-radius: 20px;
+    box-shadow: 0 25px 70px rgba(45, 90, 61, 0.2);
+    max-width: 480px;
+    width: 100%;
+    animation: slideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 2px solid rgba(90, 155, 111, 0.1);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+h2 {
+    text-align: center;
+    background: linear-gradient(135deg, #2d5a3d 0%, #3f7d52 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #8b8b8b;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 35px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group {
+    margin-bottom: 25px;
+    animation: fadeInUp 0.6s ease-out forwards;
+    opacity: 0;
+}
+
+.form-group:nth-child(1) { animation-delay: 0.15s; }
+.form-group:nth-child(2) { animation-delay: 0.25s; }
+.form-group:nth-child(3) { animation-delay: 0.35s; }
+.form-group:nth-child(4) { animation-delay: 0.45s; }
+.form-group:nth-child(5) { animation-delay: 0.55s; }
+.form-group:nth-child(6) { animation-delay: 0.65s; }
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 700;
+    color: #2d5a3d;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    opacity: 0.95;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #d9d1c8;
+    border-radius: 10px;
+    font-size: 15px;
+    box-sizing: border-box;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background-color: #fdfbf8;
+    font-weight: 500;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: #3f7d52;
+    background-color: white;
+    box-shadow: 0 0 0 4px rgba(63, 125, 82, 0.12);
+    transform: translateY(-1px);
+}
+
+input[type="text"]::placeholder {
+    color: #c5bab0;
+    font-weight: 400;
+}
+
+button {
+    padding: 16px 28px;
+    background: linear-gradient(135deg, #2d5a3d 0%, #3f7d52 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 700;
+    margin-top: 20px;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 0.5px;
+    box-shadow: 0 6px 20px rgba(45, 90, 61, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(90, 155, 111, 0.3);
+}
+
+button:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+button:active {
+    transform: translateY(-1px);
+}
+
+#qrcode {
+    text-align: center;
+    margin-top: 35px;
+    padding: 25px;
+    background: white;
+    border-radius: 12px;
+    animation: fadeInUp 0.6s ease-out 0.7s both;
+    box-shadow: 0 8px 25px rgba(45, 90, 61, 0.12);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 4px;
+    background-color: #e8dcd1;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3f7d52 0%, #5a9b6f 100%);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.field-status {
+    font-size: 12px;
+    margin-top: 6px;
+    display: none;
+    font-weight: 600;
+}
+
+.field-status.valid {
+    color: #00c853;
+    display: block;
+}
+
+.field-status.invalid {
+    color: #ff5252;
+    display: block;
+}
+
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, #3f7d52 0%, #5a9b6f 100%);
+    color: white;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    animation: slideInRight 0.4s ease-out;
+    z-index: 1000;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.toast.success {
+    background: linear-gradient(135deg, #00c853 0%, #00acc1 100%);
+}
+
+.toast.error {
+    background: linear-gradient(135deg, #ff5252 0%, #ff6e40 100%);
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 35px 25px;
+        border-radius: 18px;
+    }
+    
+    h2 {
+        font-size: 26px;
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+<h2>🏥 Emergency Medical ID</h2>
+<p class="subtitle">Create Your QR Code</p>
+
+<form id="medicalForm">
+<div class="progress-bar">
+    <div class="progress-bar-fill" id="progressBar"></div>
+</div>
+
+<div class="form-group">
+<label for="name">Name:</label>
+<input type="text" id="name" placeholder="Enter your full name" required>
+<div class="field-status" id="nameStatus"></div>
+</div>
+
+<div class="form-group">
+<label for="blood">Blood Group:</label>
+<input type="text" id="blood" placeholder="e.g., O+, A-, etc.">
+<div class="field-status" id="bloodStatus"></div>
+</div>
+
+<div class="form-group">
+<label for="allergy">Allergies:</label>
+<input type="text" id="allergy" placeholder="List any allergies">
+<div class="field-status" id="allergyStatus"></div>
+</div>
+
+<div class="form-group">
+<label for="condition">Medical Condition:</label>
+<input type="text" id="condition" placeholder="Any medical conditions">
+<div class="field-status" id="conditionStatus"></div>
+</div>
+
+<div class="form-group">
+<label for="contact">Emergency Contact:</label>
+<input type="text" id="contact" placeholder="Name and phone number">
+<div class="field-status" id="contactStatus"></div>
+</div>
+
+<button type="button" id="generateBtn" onclick="generateQR()">Generate QR Code</button>
+</form>
+
+<div style="text-align: center; margin-top: 20px;">
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>

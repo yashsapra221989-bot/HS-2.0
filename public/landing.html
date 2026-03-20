@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HealthSync — Emergency Health QR System</title>
+  <meta name="description"
+    content="HealthSync — Your medical history, one scan away. First responders get instant access to critical health data." />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=DM+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0d1a2e;
+      --surface: rgba(255, 255, 255, 0.08);
+      --surface2: rgba(200, 217, 230, 0.12);
+      --surface3: rgba(200, 217, 230, 0.18);
+      --border: rgba(200, 217, 230, 0.2);
+      --accent: #7eb8d4;
+      --accent-dim: rgba(126, 184, 212, 0.15);
+      --green: #a8e6cf;
+      --green-dim: rgba(168, 230, 207, 0.1);
+      --text: #e8f0f5;
+      --text2: #9fbfce;
+      --text3: #5a8a9e;
+    }
+
+    html,
+    body {
+      height: 100%;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* Grid overlay */
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(86, 124, 141, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(86, 124, 141, 0.06) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 48px;
+      background: rgba(13, 26, 46, 0.7);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(126, 184, 212, 0.15);
+      z-index: 200;
+    }
+
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.4rem;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .nav-logo span {
+      color: var(--accent);
+    }
+
+    .nav-right {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .nav-btn {
+      padding: 8px 18px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      background: transparent;
+      color: var(--text2);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .nav-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .nav-btn.primary {
+      background: var(--accent);
+      color: #0d1a2e;
+      border: none;
+      font-weight: 700;
+    }
+
+    .nav-btn.primary:hover {
+      background: #a8d8ef;
+      transform: translateY(-1px);
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 100px 48px 200px;
+      text-align: center;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Subtle dark vignette so text reads over scene */
+    .hero::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 65% at 50% 38%, rgba(13, 26, 46, 0.20) 0%, rgba(13, 26, 46, 0.75) 100%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .hero-tag {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid rgba(86, 124, 141, 0.3);
+      border-radius: 100px;
+      padding: 6px 16px;
+      margin-bottom: 32px;
+      background: var(--accent-dim);
+      animation: tagFade 0.6s ease both;
+    }
+
+    @keyframes tagFade {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hero-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(3rem, 7vw, 5.5rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -1.5px;
+      color: var(--text);
+      margin-bottom: 24px;
+      animation: titleIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+    }
+
+    @keyframes titleIn {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hero-title .accent-line {
+      background: linear-gradient(135deg, var(--accent), var(--green));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: block;
+    }
+
+    .hero-sub {
+      max-width: 540px;
+      font-size: 1.05rem;
+      font-weight: 300;
+      color: var(--text2);
+      line-height: 1.6;
+      margin-bottom: 56px;
+      animation: titleIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+    }
+
+    /* ─── PORTAL CARDS ─── */
+    .portal-row {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: cardsIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both;
+      width: 100%;
+    }
+
+    @keyframes cardsIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .portal-card {
+      position: relative;
+      background: rgba(13, 26, 46, 0.5);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(126, 184, 212, 0.22);
+      border-radius: 20px;
+      padding: 32px;
+      width: 100%;
+      max-width: 320px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      text-align: left;
+      overflow: hidden;
+    }
+
+    .portal-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, rgba(126, 184, 212, 0.1), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .portal-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(126, 184, 212, 0.45);
+      box-shadow: 0 16px 40px rgba(13, 26, 46, 0.5);
+    }
+
+    .portal-card:hover::before {
+      opacity: 1;
+    }
+
+    .card-left-accent {
+      position: absolute;
+      left: 0;
+      top: 24px;
+      bottom: 24px;
+      width: 4px;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .card-hospital .card-left-accent {
+      background: var(--green);
+    }
+
+    .card-patient .card-left-accent {
+      background: var(--accent);
+    }
+
+    .card-icon-wrap {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      flex-shrink: 0;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+    }
+
+    .card-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .card-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .card-edit-icon {
+      font-size: 1rem;
+      color: var(--text3);
+      transition: color 0.2s;
+    }
+
+    .portal-card:hover .card-edit-icon {
+      color: var(--accent);
+    }
+
+    .card-desc {
+      font-size: 0.85rem;
+      color: var(--text2);
+      line-height: 1.6;
+    }
+
+    /* ─── FEATURE STRIP ─── */
+    .feature-strip {
+      background: rgba(13, 26, 46, 0.75);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(126, 184, 212, 0.15);
+      padding: 24px 48px;
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 200;
+    }
+
+    .feat-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text2);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .feat-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+      box-shadow: 0 0 8px rgba(86, 124, 141, 0.4);
+    }
+
+    /* ─── AMBULANCE BACKGROUND (HealthSync Theme) ─── */
+    .ambulance-scene {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      /* Dusk sky in HealthSync palette: deep navy → teal */
+      background: linear-gradient(180deg, #2F4156 0%, #567C8D 100%);
+    }
+
+    /* Sky — teal-to-navy HealthSync dusk gradient */
+    .amb-sky {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg,
+          #1e2f42 0%,
+          #2F4156 30%,
+          #3d596e 55%,
+          #567C8D 80%,
+          #6a91a3 100%);
+    }
+
+    /* Subtle horizon glow using sky blue */
+    .amb-sky::after {
+      content: '';
+      position: absolute;
+      bottom: 80px;
+      left: 0;
+      right: 0;
+      height: 80px;
+      background: linear-gradient(180deg, transparent, rgba(200, 217, 230, 0.18));
+    }
+
+    /* Twinkling stars */
+    .amb-star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      opacity: 0.35;
+      animation: starTwinkle 3s ease-in-out infinite;
+    }
+
+    @keyframes starTwinkle {
+
+      0%,
+      100% {
+        opacity: 0.35;
+      }
+
+      50% {
+        opacity: 0.08;
+      }
+    }
+
+    /* City silhouette */
+    .amb-city {
+      position: absolute;
+      bottom: 58px;
+      left: 0;
+      right: 0;
+      height: 160px;
+      display: flex;
+      align-items: flex-end;
+      overflow: hidden;
+      animation: cityScroll 25s linear infinite;
+    }
+
+    @keyframes cityScroll {
+      from {
+        transform: translateX(0);
+      }
+
+      to {
+        transform: translateX(-50%);
+      }
+    }
+
+    /* Road — deep navy matching HealthSync navy */
+    .amb-road {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 80px;
+      background: #2F4156;
+      border-top: 2px solid #567C8D;
+    }
+
+    .amb-road-line {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 200%;
+      height: 3px;
+      /* Road dashes in sky blue to match theme */
+      background: repeating-linear-gradient(90deg, #C8D9E6 0px, #C8D9E6 30px, transparent 30px, transparent 70px);
+      transform: translateY(-50%);
+      animation: roadScroll 0.55s linear infinite;
+      opacity: 0.7;
+    }
+
+    @keyframes roadScroll {
+      from {
+        transform: translateY(-50%) translateX(0);
+      }
+
+      to {
+        transform: translateY(-50%) translateX(-70px);
+      }
+    }
+
+    /* Speed lines behind ambulance */
+    .amb-speedlines {
+      position: absolute;
+      bottom: 82px;
+      left: 0;
+      right: 50%;
+      height: 110px;
+      pointer-events: none;
+    }
+
+    /* Speed lines — teal-tinted */
+    .speed-line {
+      position: absolute;
+      height: 2px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, transparent, rgba(200, 217, 230, 0.5));
+      animation: speedLine 0.6s linear infinite;
+    }
+
+    @keyframes speedLine {
+      from {
+        transform: translateX(60px);
+        opacity: 0.0;
+      }
+
+      to {
+        transform: translateX(-20px);
+        opacity: 0.5;
+      }
+    }
+
+    /* Siren glow */
+    .amb-siren-glow {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 80px;
+      /* Classic Red and Blue siren glow */
+      background: radial-gradient(ellipse at 50% 0%, rgba(220, 38, 38, 0.18) 0%, transparent 55%),
+        radial-gradient(ellipse at 55% 0%, rgba(37, 99, 235, 0.18) 0%, transparent 55%);
+      animation: sirenGlow 0.5s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+
+    @keyframes sirenGlow {
+      from {
+        opacity: 1;
+      }
+
+      to {
+        opacity: 0.3;
+      }
+    }
+
+    /* The ambulance SVG itself */
+    .amb-vehicle {
+      position: absolute;
+      bottom: 78px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 260px;
+      filter: drop-shadow(0 8px 28px rgba(0, 0, 0, 0.7));
+      animation: ambBounce 0.28s ease-in-out infinite alternate;
+    }
+
+    @keyframes ambBounce {
+      from {
+        transform: translateX(-50%) translateY(0px);
+      }
+
+      to {
+        transform: translateX(-50%) translateY(-4px);
+      }
+    }
+
+    /* Siren light flashing */
+    .siren-red {
+      animation: sirenFlash 0.5s steps(1) infinite;
+    }
+
+    .siren-blue {
+      animation: sirenFlash 0.5s steps(1) 0.25s infinite;
+    }
+
+    @keyframes sirenFlash {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.1;
+      }
+    }
+
+    /* Wheel spin */
+    .wheel-group {
+      animation: wheelSpin 0.3s linear infinite;
+      transform-origin: center;
+    }
+
+    /* Siren beam from top */
+    .amb-beam-r {
+      position: absolute;
+      top: 0;
+      left: calc(50% + 16px);
+      width: 0;
+      height: 0;
+      border-left: 30px solid transparent;
+      border-right: 30px solid transparent;
+      border-top: 100vh solid rgba(220, 38, 38, 0.12);
+      transform-origin: top center;
+      animation: beamFlash 0.5s steps(1) infinite;
+      pointer-events: none;
+    }
+
+    .amb-beam-b {
+      position: absolute;
+      top: 0;
+      left: calc(50% - 46px);
+      width: 0;
+      height: 0;
+      border-left: 30px solid transparent;
+      border-right: 30px solid transparent;
+      border-top: 100vh solid rgba(37, 99, 235, 0.12);
+      transform-origin: top center;
+      animation: beamFlash 0.5s steps(1) 0.25s infinite;
+      pointer-events: none;
+    }
+
+    @keyframes beamFlash {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0;
+      }
+    }
+
+    /* Badge overlay — HealthSync themed */
+    .amb-badge {
+      position: fixed;
+      top: 80px;
+      right: 24px;
+      z-index: 150;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.66rem;
+      letter-spacing: 1px;
+      color: var(--text2);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(13, 26, 46, 0.6);
+      backdrop-filter: blur(10px);
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(126, 184, 212, 0.22);
+    }
+
+    .amb-badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #dc2626;
+      box-shadow: 0 0 8px #dc2626;
+      animation: dotBlink 1.2s ease-in-out infinite;
+    }
+
+    @keyframes dotBlink {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.2;
+      }
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 700px) {
+      nav {
+        padding: 16px 24px;
+      }
+
+      .hero {
+        padding: 100px 24px 180px;
+      }
+
+      .feature-strip {
+        gap: 24px;
+        padding: 20px 24px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .amb-vehicle {
+        width: 180px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ─── Full-page ambulance background ─── -->
+  <div class="ambulance-scene" aria-hidden="true">
+    <div class="amb-sky"></div>
+
+    <!-- Stars -->
+    <div class="amb-star" style="top:8%;left:4%;animation-delay:0.2s"></div>
+    <div class="amb-star" style="top:15%;left:12%;animation-delay:0.8s"></div>
+    <div class="amb-star" style="top:5%;left:22%;animation-delay:0.4s"></div>
+    <div class="amb-star" style="top:18%;left:35%;animation-delay:1.1s"></div>
+    <div class="amb-star" style="top:10%;left:55%;animation-delay:0.6s"></div>
+    <div class="amb-star" style="top:4%;left:68%;animation-delay:1.3s"></div>
+    <div class="amb-star" style="top:20%;left:78%;animation-delay:0.3s"></div>
+    <div class="amb-star" style="top:12%;left:90%;animation-delay:0.9s"></div>
+    <div class="amb-star" style="top:7%;left:45%;animation-delay:1.5s;width:3px;height:3px"></div>
+    <div class="amb-star" style="top:16%;left:82%;animation-delay:0.5s;width:3px;height:3px"></div>
+
+    <!-- City skyline (doubled for seamless scroll) -->
+    <div class="amb-city">
+      <svg width="1640" height="160" viewBox="0 0 1640 160" fill="none" xmlns="http://www.w3.org/2000/svg"
+        style="flex-shrink:0;width:200%">
+        <!-- Left copy -->
+        <rect x="0" y="60" width="28" height="100" fill="#2F4156" />
+        <rect x="10" y="45" width="8" height="15" fill="#2F4156" />
+        <rect x="35" y="80" width="22" height="80" fill="#2F4156" />
+        <rect x="64" y="20" width="34" height="140" fill="#2F4156" />
+        <rect x="70" y="35" width="6" height="6" fill="#C8D9E6" opacity="0.6" />
+        <rect x="80" y="55" width="6" height="6" fill="#C8D9E6" opacity="0.4" />
+        <rect x="70" y="72" width="6" height="6" fill="#C8D9E6" opacity="0.7" />
+        <rect x="104" y="50" width="26" height="110" fill="#2F4156" />
+        <rect x="136" y="90" width="18" height="70" fill="#2F4156" />
+        <rect x="160" y="25" width="40" height="135" fill="#2F4156" />
+        <rect x="166" y="44" width="6" height="6" fill="#C8D9E6" opacity="0.5" />
+        <rect x="178" y="44" width="6" height="6" fill="#C8D9E6" opacity="0.3" />
+        <rect x="166" y="64" width="6" height="6" fill="#C8D9E6" opacity="0.6" />
+        <rect x="206" y="70" width="24" height="90" fill="#2F4156" />
+        <rect x="236" y="40" width="32" height="120" fill="#2F4156" />
+        <rect x="242" y="55" width="6" height="6" fill="#C8D9E6" opacity="0.4" />
+        <rect x="274" y="88" width="20" height="72" fill="#2F4156" />
+        <rect x="300" y="30" width="36" height="130" fill="#2F4156" />
+        <rect x="306" y="50" width="6" height="6" fill="#C8D9E6" opacity="0.55" />
+        <rect x="316" y="50" width="6" height="6" fill="#C8D9E6" opacity="0.35" />
+        <rect x="342" y="68" width="22" height="92" fill="#2F4156" />
+        <rect x="370" y="44" width="30" height="116" fill="#2F4156" />
+        <rect x="376" y="60" width="6" height="6" fill="#C8D9E6" opacity="0.5" />
+        <rect x="406" y="86" width="18" height="74" fill="#2F4156" />
+        <rect x="430" y="18" width="38" height="142" fill="#2F4156" />
+        <rect x="436" y="38" width="6" height="6" fill="#C8D9E6" opacity="0.6" />
+        <rect x="448" y="38" width="6" height="6" fill="#C8D9E6" opacity="0.3" />
+        <rect x="436" y="58" width="6" height="6" fill="#C8D9E6" opacity="0.5" />
+        <rect x="474" y="62" width="24" height="98" fill="#2F4156" />
+        <rect x="504" y="35" width="34" height="125" fill="#2F4156" />
+        <rect x="510" y="52" width="6" height="6" fill="#C8D9E6" opacity="0.45" />
+        <rect x="544" y="75" width="20" height="85" fill="#2F4156" />
+        <rect x="570" y="28" width="36" height="132" fill="#2F4156" />
+        <rect x="576" y="48" width="6" height="6" fill="#C8D9E6" opacity="0.5" />
+        <rect x="586" y="48" width="6" height="6" fill="#C8D9E6" opacity="0.4" />
+        <rect x="612" y="66" width="22" height="94" fill="#2F4156" />
+        <rect x="640" y="38" width="32" height="122" fill="#2F4156" />
+        <rect x="646" y="55" width="6" height="6" fill="#C8D9E6" opacity="0.55" />
+        <rect x="678" y="86" width="20" height="74" fill="#2F4156" />
+        <rect x="704" y="16" width="38" height="144" fill="#2F4156" />
+        <rect x="710" y="36" width="6" height="6" fill="#C8D9E6" opacity="0.6" />
+        <rect x="722" y="36" width="6" height="6" fill="#C8D9E6" opacity="0.35" />
+        <rect x="710" y="58" width="6" height="6" fill="#C8D9E6" opacity="0.5" />
+        <rect x="748" y="56" width="26" height="104" fill="#2F4156" />
+        <rect x="780" y="32" width="34" height="128" fill="#2F4156" />
+        <rect x="786" y="48" width="6" height="6" fill="#C8D9E6" opacity="0.45" />
+        <!-- Right copy (offset by 820) -->
+        <rect x="820" y="60" width="28" height="100" fill="#2F4156" />
+        <rect x="830" y="45" width="8" height="15" fill="#2F4156" />
+        <rect x="855" y="80" width="22" height="80" fill="#2F4156" />
+        <rect x="884" y="20" width="34" height="140" fill="#2F4156" />
+        <rect x="890" y="35" width="6" height="6" fill="#C8D9E6" opacity="0.6" />
+        <rect x="900" y="55" width="6" height="6" fill="#C8D9E6" opacity="0.4" />
+        <rect x="890" y="72" width="6" height="6" fill="#C8D9E6" opacity="0.7" />
+        <rect x="924" y="50" width="26" height="110" fill="#2F4156" />
+        <rect x="956" y="90" width="18" height="70" fill="#2F4156" />
+        <rect x="980" y="25" width="40" height="135" fill="#2F4156" />
+        <rect x="986" y="44" width="6" height="6" fill="#C8D9E6" opacity="0.5" />
+        <rect x="998" y="44" width="6" height="6" fill="#C8D9E6" opacity="0.3" />
+        <rect x="986" y="64" width="6" height="6" fill="#C8D9E6" opacity="0.6" />
+        <rect x="1026" y="70" width="24" height="90" fill="#2F4156" />
+        <rect x="1056" y="40" width="32" height="120" fill="#2F4156" />
+        <rect x="1062" y="55" width="6" height="6" fill="#C8D9E6" opacity="0.4" />
+        <rect x="1094" y="88" width="20" height="72" fill="#2F4156" />
+        <rect x="1120" y="30" width="36" height="130" fill="#2F4156" />
+        <rect x="1126" y="50" width="6" height="6" fill="#C8D9E6" opacity="0.55" />
+        <rect x="1136" y="50" width="6" height="6" fill="#C8D9E6" opacity="0.35" />
+        <rect x="1162" y="68" width="22" height="92" fill="#2F4156" />
+        <rect x="1190" y="44" width="30" height="116" fill="#2F4156" />
+        <rect x="1196" y="60" width="6" height="6" fill="#C8D9E6" opacity="0.5" />
+        <rect x="1226" y="86" width="18" height="74" fill="#2F4156" />
+        <rect x="1250" y="18" width="38" height="142" fill="#2F4156" />
+        <rect x="1256" y="38" width="6" height="6" fill="#C8D9E6" opacity="0.6" />
+        <rect x="1268" y="38" width="6" height="6" fill="#C8D9E6" opacity="0.3" />
+        <rect x="1256" y="58" width="6" height="6" fill="#C8D9E6" opacity="0.5" />
+        <rect x="1294" y="62" width="24" height="98" fill="#2F4156" />
+        <rect x="1324" y="35" width="34" height="125" fill="#2F4156" />
+        <rect x="1330" y="52" width="6" height="6" fill="#C8D9E6" opacity="0.45" />
+        <rect x="1364" y="75" width="20" height="85" fill="#2F4156" />
+        <rect x="1390" y="28" width="36" height="132" fill="#2F4156" />
+        <rect x="1396" y="48" width="6" height="6" fill="#C8D9E6" opacity="0.5" />
+        <rect x="1406" y="48" width="6" height="6" fill="#C8D9E6" opacity="0.4" />
+        <rect x="1432" y="66" width="22" height="94" fill="#2F4156" />
+        <rect x="1460" y="38" width="32" height="122" fill="#2F4156" />
+        <rect x="1466" y="55" width="6" height="6" fill="#C8D9E6" opacity="0.55" />
+        <rect x="1498" y="86" width="20" height="74" fill="#2F4156" />
+        <rect x="1524" y="16" width="38" height="144" fill="#2F4156" />
+        <rect x="1530" y="36" width="6" height="6" fill="#C8D9E6" opacity="0.6" />
+        <rect x="1542" y="36" width="6" height="6" fill="#C8D9E6" opacity="0.35" />
+        <rect x="1530" y="58" width="6" height="6" fill="#C8D9E6" opacity="0.5" />
+        <rect x="1568" y="56" width="26" height="104" fill="#2F4156" />
+        <rect x="1600" y="32" width="34" height="128" fill="#2F4156" />
+        <rect x="1606" y="48" width="6" height="6" fill="#C8D9E6" opacity="0.45" />
+      </svg>
+    </div>
+
+    <!-- Road -->
+    <div class="amb-road">
+      <div class="amb-road-line"></div>
+    </div>
+
+    <!-- Siren glow on ground -->
+    <div class="amb-siren-glow"></div>
+
+    <!-- Speed lines -->
+    <div class="amb-speedlines">
+      <div class="speed-line" style="top:20%;left:5%;width:38%;animation-delay:0s"></div>
+      <div class="speed-line" style="top:38%;left:2%;width:42%;animation-delay:0.15s"></div>
+      <div class="speed-line" style="top:55%;left:8%;width:32%;animation-delay:0.05s"></div>
+      <div class="speed-line" style="top:68%;left:0%;width:45%;animation-delay:0.22s"></div>
+      <div class="speed-line" style="top:80%;left:5%;width:28%;animation-delay:0.1s"></div>
+    </div>
+
+    <!-- Siren beams -->
+    <div class="amb-beam-r"></div>
+    <div class="amb-beam-b"></div>
+
+    <!-- Ambulance SVG in its bright original colors so it stands out -->
+    <svg class="amb-vehicle" viewBox="0 0 200 90" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="100" cy="88" rx="72" ry="5" fill="rgba(13,26,46,0.6)" />
+      <rect x="10" y="28" width="168" height="52" rx="6" fill="#FFFFFF" />
+      <rect x="138" y="22" width="40" height="58" rx="6" fill="#e8edf5" />
+      <rect x="10" y="52" width="168" height="10" fill="#dc2626" />
+      <text x="52" y="48" font-family="Arial" font-size="9" font-weight="bold" fill="#2F4156" text-anchor="middle"
+        letter-spacing="2">AMBULANCE</text>
+      <rect x="22" y="34" width="14" height="14" rx="2" fill="#dc2626" />
+      <rect x="24" y="37" width="10" height="4" fill="#FFFFFF" />
+      <rect x="27" y="34" width="4" height="10" fill="#FFFFFF" />
+      <rect x="142" y="26" width="28" height="20" rx="4" fill="#93c5fd" opacity="0.8" />
+      <line x1="156" y1="26" x2="156" y2="46" stroke="#9ca3af" stroke-width="1.5" />
+      <rect x="174" y="50" width="8" height="8" rx="2" fill="#fef08a" opacity="0.9" />
+      <rect x="90" y="32" width="36" height="18" rx="3" fill="#bfdbfe" opacity="0.8" />
+      <rect x="60" y="18" width="16" height="10" rx="3" class="siren-red" fill="#dc2626" />
+      <rect x="80" y="18" width="16" height="10" rx="3" class="siren-blue" fill="#2563eb" />
+      <line x1="150" y1="22" x2="150" y2="10" stroke="#8892a4" stroke-width="2" />
+      <circle cx="150" cy="9" r="2" fill="#dc2626" class="siren-red" />
+      <g class="wheel-group" style="transform-origin:158px 80px">
+        <circle cx="158" cy="80" r="12" fill="#1e2535" />
+        <circle cx="158" cy="80" r="8" fill="#374151" />
+        <circle cx="158" cy="80" r="3" fill="#9ca3af" />
+        <line x1="158" y1="72" x2="158" y2="88" stroke="#9ca3af" stroke-width="1.5" />
+        <line x1="150" y1="80" x2="166" y2="80" stroke="#9ca3af" stroke-width="1.5" />
+      </g>
+      <g class="wheel-group" style="transform-origin:42px 80px">
+        <circle cx="42" cy="80" r="12" fill="#1e2535" />
+        <circle cx="42" cy="80" r="8" fill="#374151" />
+        <circle cx="42" cy="80" r="3" fill="#9ca3af" />
+        <line x1="42" y1="72" x2="42" y2="88" stroke="#9ca3af" stroke-width="1.5" />
+        <line x1="34" y1="80" x2="50" y2="80" stroke="#9ca3af" stroke-width="1.5" />
+      </g>
+    </svg>
+
+    <!-- Live badge -->
+    <div class="amb-badge">
+      <div class="amb-badge-dot"></div>
+      Emergency Response Active
+    </div>
+  </div>
+
+  <div class="grid-bg"></div>
+
+  <!-- Nav -->
+  <nav>
+    <a href="landing.html" class="nav-logo">Health<span>Sync</span></a>
+    <div class="nav-right">
+      <a href="login.html?role=patient" class="nav-btn primary">INDIA</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-tag">Emergency Health QR System</div>
+
+    <h1 class="hero-title">
+      Your Medical History,<br>
+      <span class="accent-line">One Scan Away.</span>
+    </h1>
+
+    <p class="hero-sub">
+      First responders get instant access to critical health data — blood type,
+      allergies, emergency contacts — no app, no login, no delay.
+    </p>
+
+    <div class="portal-row">
+
+      <a href="login.html?role=hospital" class="portal-card card-hospital">
+        <div class="card-left-accent"></div>
+        <div class="card-icon-wrap">🏥</div>
+        <div class="card-body">
+          <div class="card-label">
+            <span class="card-title">Hospital Portal</span>
+            <span class="card-edit-icon">↗</span>
+          </div>
+          <p class="card-desc">Specialized access for administrative tracking and dashboard analytics.</p>
+        </div>
+      </a>
+
+      <a href="login.html?role=patient" class="portal-card card-patient">
+        <div class="card-left-accent"></div>
+        <div class="card-icon-wrap">🪪</div>
+        <div class="card-body">
+          <div class="card-label">
+            <span class="card-title">Patient Portal</span>
+            <span class="card-edit-icon">↗</span>
+          </div>
+          <p class="card-desc">Sign in or create an account to manage your medical profile and QR.</p>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- Feature strip -->
+  <div class="feature-strip">
+    <div class="feat-item">
+      <div class="feat-dot"></div> No app required
+    </div>
+    <div class="feat-item">
+      <div class="feat-dot"></div> Works offline via QR
+    </div>
+    <div class="feat-item">
+      <div class="feat-dot"></div> Instant first-responder access
+    </div>
+    <div class="feat-item">
+      <div class="feat-dot" style="background:var(--green); box-shadow: 0 0 8px var(--green);"></div> Secure encrypted
+      storage
+    </div>
+  </div>
+
+</body>
+
+</html>

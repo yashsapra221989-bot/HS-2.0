@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HealthSync — Patient Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #06080f;
+      --surface: #0d1117;
+      --surface2: #161b27;
+      --surface3: #1e2535;
+      --border: #232d42;
+      --accent: #00c8ff;
+      --accent-dim: rgba(0,200,255,0.12);
+      --green: #00e5a0;
+      --red: #ff4757;
+      --text: #e8edf5;
+      --text2: #8892a4;
+      --text3: #4a5568;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Grid background */
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Noise overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
+    }
+
+    /* Scan line */
+    .scanline {
+      position: fixed;
+      left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, var(--accent) 50%, transparent 100%);
+      opacity: 0.15;
+      z-index: 1;
+      animation: scanSweep 7s linear infinite;
+    }
+    @keyframes scanSweep { from { top: -2px; } to { top: 100vh; } }
+
+    /* Nav */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 40px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(6,8,15,0.8);
+      backdrop-filter: blur(20px);
+      z-index: 100;
+    }
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.3rem;
+      letter-spacing: -0.5px;
+      color: var(--text);
+    }
+    .nav-logo span { color: var(--accent); }
+    .nav-badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text3);
+      letter-spacing: 1px;
+    }
+
+    /* Page wrapper */
+    .page-center {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 940px;
+      padding: 24px;
+      animation: wrapIn 0.7s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes wrapIn {
+      from { opacity: 0; transform: translateY(40px) scale(0.96); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Card ring + card */
+    .card-ring {
+      padding: 1.5px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, var(--accent), #a78bfa, #ff6b35, var(--accent));
+      background-size: 300% 300%;
+      animation: ringShift 6s ease infinite;
+      box-shadow:
+        0 0 50px rgba(0,200,255,0.1),
+        0 0 100px rgba(124,77,255,0.08),
+        0 40px 90px rgba(0,0,0,0.7);
+    }
+    @keyframes ringShift {
+      0%,100% { background-position: 0% 50%; }
+      50%      { background-position: 100% 50%; }
+    }
+
+    .card {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-radius: 21px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    /* LEFT: Brand panel */
+    .brand-panel {
+      background: linear-gradient(160deg, #0a1929 0%, #050c16 60%, #0d0522 100%);
+      padding: 52px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      border-right: 1px solid var(--border);
+    }
+    .brand-panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,200,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,200,255,0.04) 1px, transparent 1px);
+      background-size: 36px 36px;
+      animation: gridDrift 20s linear infinite;
+    }
+    @keyframes gridDrift {
+      from { background-position: 0 0; }
+      to   { background-position: 36px 36px; }
+    }
+    .brand-glow {
+      position: absolute;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,200,255,0.1) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      z-index: 0;
+      animation: glowPulse 4s ease-in-out infinite;
+    }
+    @keyframes glowPulse {
+      0%,100% { opacity: 0.6; transform: translate(-50%,-50%) scale(1); }
+      50%      { opacity: 1;   transform: translate(-50%,-50%) scale(1.15); }
+    }
+    .brand-content { position: relative; z-index: 1; text-align: center; }
+
+    .logo-badge {
+      width: 80px; height: 80px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #0d2b40, #1a0d3d);
+      border: 1.5px solid rgba(0,200,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem;
+      margin: 0 auto 20px;
+      box-shadow: 0 0 40px rgba(0,200,255,0.2);
+      animation: badgeSpin 8s ease-in-out infinite;
+    }
+    @keyframes badgeSpin {
+      0%,100% { box-shadow: 0 0 40px rgba(0,200,255,0.2); border-color: rgba(0,200,255,0.2); }
+      33%      { box-shadow: 0 0 40px rgba(167,139,250,0.3); border-color: rgba(167,139,250,0.3); }
+      66%      { box-shadow: 0 0 40px rgba(255,107,53,0.2); border-color: rgba(255,107,53,0.2); }
+    }
+
+    .brand-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 800;
+      line-height: 1.25;
+      background: linear-gradient(135deg, var(--accent), var(--green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+    .brand-sub {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--text3);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 36px;
+    }
+
+    .stat-pills {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      max-width: 210px;
+    }
+    .stat-pill {
+      background: rgba(0,200,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.78rem;
+      color: var(--text2);
+      font-family: 'DM Mono', monospace;
+      animation: pillIn 0.5s ease both;
+    }
+    .stat-pill:nth-child(1) { animation-delay: 0.5s; }
+    .stat-pill:nth-child(2) { animation-delay: 0.65s; }
+    .stat-pill:nth-child(3) { animation-delay: 0.8s; }
+    @keyframes pillIn {
+      from { opacity: 0; transform: translateX(-12px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .pill-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      animation: dotBlink 2s ease-in-out infinite;
+    }
+    @keyframes dotBlink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .dot-green  { background: var(--green); box-shadow: 0 0 8px var(--green); }
+    .dot-cyan   { background: var(--accent); box-shadow: 0 0 8px var(--accent); animation-delay: 0.7s; }
+    .dot-purple { background: #a78bfa; box-shadow: 0 0 8px #a78bfa; animation-delay: 1.4s; }
+
+    .sys-time-bar {
+      margin-top: 28px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: rgba(0,200,255,0.35);
+      letter-spacing: 1px;
+    }
+    .sys-time-bar span { color: var(--accent); }
+
+    /* RIGHT: Form panel */
+    .form-panel {
+      padding: 52px 44px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: var(--surface);
+    }
+
+    .form-header { margin-bottom: 32px; }
+    .form-header h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.7rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .form-header p { font-size: 0.88rem; color: var(--text2); font-weight: 300; }
+
+    /* Step breadcrumb */
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 28px;
+      font-size: 0.75rem;
+      font-family: 'DM Mono', monospace;
+      color: var(--text3);
+    }
+    .step-num {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: #a78bfa;
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .step-line { width: 24px; height: 1px; background: var(--border); }
+
+    /* Error banner */
+    #globalError {
+      background: rgba(255,71,87,0.08);
+      border: 1px solid rgba(255,71,87,0.25);
+      color: #ff6b87;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.78rem;
+      font-family: 'DM Mono', monospace;
+      font-weight: 600;
+      margin-bottom: 18px;
+      display: none;
+      animation: shake 0.35s ease;
+    }
+    @keyframes shake { 0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);} }
+
+    /* Form groups */
+    .form-group { margin-bottom: 20px; }
+
+    label {
+      display: block;
+      font-size: 0.72rem;
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 1px;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 9px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .lbl-idx {
+      background: var(--accent-dim);
+      border: 1px solid rgba(0,200,255,0.2);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: 0.65rem;
+      color: rgba(0,200,255,0.7);
+    }
+
+    .input-wrap { position: relative; }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 13px 18px 13px 46px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      font-size: 0.9rem;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      outline: none;
+      transition: all 0.25s;
+      caret-color: var(--accent);
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    input::placeholder { color: var(--text3); font-weight: 400; }
+    input:focus {
+      background: var(--surface3);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0,200,255,0.08);
+    }
+    input.error-field {
+      border-color: var(--red) !important;
+      box-shadow: 0 0 0 3px rgba(255,71,87,0.12) !important;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%; transform: translateY(-50%);
+      font-size: 1rem;
+      opacity: 0.45;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .toggle-pw {
+      position: absolute;
+      right: 12px;
+      top: 50%; transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      opacity: 0.4;
+      color: var(--text);
+      transition: opacity 0.2s;
+      padding: 4px;
+      line-height: 1;
+    }
+    .toggle-pw:hover { opacity: 0.9; }
+
+    .field-error {
+      display: block;
+      font-size: 0.72rem;
+      font-family: 'DM Mono', monospace;
+      color: var(--red);
+      margin-top: 6px;
+      min-height: 15px;
+    }
+
+    /* Options row */
+    .options-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      font-size: 0.8rem;
+    }
+    .remember {
+      display: flex; align-items: center; gap: 8px;
+      color: var(--text2); cursor: pointer; user-select: none;
+    }
+    .remember input[type="checkbox"] { width: 14px; height: 14px; accent-color: var(--accent); }
+    .forgot { color: var(--accent); font-weight: 500; text-decoration: none; opacity: 0.8; transition: opacity 0.2s; }
+    .forgot:hover { opacity: 1; text-decoration: underline; }
+
+    /* Submit button */
+    .btn-login {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      border-radius: 12px;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s;
+      letter-spacing: 0.3px;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      position: relative; overflow: hidden;
+    }
+    .btn-login::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 60%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s ease;
+    }
+    .btn-login:hover:not(:disabled)::after { left: 150%; }
+    .btn-login:hover:not(:disabled) {
+      background: #33d4ff;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0,200,255,0.3);
+    }
+    .btn-login:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* Spinner */
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(0,0,0,0.2);
+      border-top-color: var(--bg);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Security row */
+    .security-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 20px;
+      font-size: 0.7rem;
+      font-family: 'DM Mono', monospace;
+      color: var(--text3);
+      letter-spacing: 0.4px;
+    }
+    .sec-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); animation: dotBlink 3s ease infinite; }
+
+    /* Success overlay */
+    #successOverlay {
+      position: fixed; inset: 0;
+      background: rgba(6,8,15,0.85);
+      backdrop-filter: blur(10px);
+      display: none; align-items: center; justify-content: center; z-index: 999;
+    }
+    #successOverlay.show { display: flex; animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .success-card {
+      background: var(--surface);
+      border: 1px solid rgba(0,229,160,0.3);
+      border-radius: 22px;
+      padding: 52px 56px;
+      text-align: center;
+      box-shadow: 0 0 70px rgba(0,200,255,0.12), 0 40px 80px rgba(0,0,0,0.6);
+      animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+      max-width: 340px; width: 90%;
+    }
+    @keyframes popIn { from{transform:scale(0.65);opacity:0;} to{transform:scale(1);opacity:1;} }
+    .success-ring {
+      width: 78px; height: 78px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--green));
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 18px;
+      font-size: 2rem; color: var(--bg);
+      box-shadow: 0 0 40px rgba(0,229,160,0.4);
+      animation: ringIn 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.1s both;
+    }
+    @keyframes ringIn { from{transform:scale(0) rotate(-30deg);} to{transform:scale(1) rotate(0deg);} }
+    .success-card h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.3rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--green));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 8px;
+    }
+    .success-card p { color: var(--text2); font-size: 0.85rem; }
+
+    /* Forgot modal */
+    #forgotOverlay {
+      position: fixed; inset: 0;
+      background: rgba(6,8,15,0.75);
+      backdrop-filter: blur(6px);
+      display: none; align-items: center; justify-content: center; z-index: 998;
+    }
+    #forgotOverlay.show { display: flex; }
+    .forgot-card {
+      background: var(--surface);
+      border: 1px solid rgba(167,139,250,0.25);
+      border-radius: 20px; padding: 40px 44px;
+      text-align: center;
+      box-shadow: 0 0 50px rgba(167,139,250,0.15), 0 30px 70px rgba(0,0,0,0.5);
+      max-width: 360px; width: 90%;
+      animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    .forgot-card .icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .forgot-card h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.2rem; font-weight: 800;
+      color: #a78bfa;
+      margin-bottom: 10px;
+    }
+    .forgot-card p { color: var(--text2); font-size: 0.82rem; line-height: 1.65; margin-bottom: 24px; }
+    .btn-dismiss {
+      padding: 11px 32px;
+      background: #a78bfa;
+      color: var(--bg); border: none; border-radius: 10px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700; font-size: 0.88rem;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-dismiss:hover { background: #c4b5fd; transform: translateY(-2px); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--surface); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* Responsive */
+    @media (max-width: 700px) {
+      .card { grid-template-columns: 1fr; }
+      .brand-panel { padding: 36px 30px 28px; border-right: none; border-bottom: 1px solid var(--border); }
+      .form-panel { padding: 36px 28px; }
+      nav { padding: 14px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+  <div class="scanline"></div>
+
+  <!-- Nav -->
+  <nav>
+    <div class="nav-logo">Health<span>Sync</span></div>
+    <span class="nav-badge">EMERGENCY HEALTH QR SYSTEM</span>
+  </nav>
+
+  <!-- Success overlay -->
+  <div id="successOverlay">
+    <div class="success-card">
+      <div class="success-ring">✓</div>
+      <h2>Access Granted</h2>
+      <p>Authentication successful.<br>Redirecting to portal…</p>
+    </div>
+  </div>
+
+  <!-- Forgot Password modal -->
+  <div id="forgotOverlay" onclick="closeForgot(event)">
+    <div class="forgot-card">
+      <div class="icon">🔑</div>
+      <h2>Forgot Password?</h2>
+      <p>Contact your system administrator with your <strong style="color:#a78bfa">User ID</strong> to reset your credentials.</p>
+      <button class="btn-dismiss" onclick="closeForgot()">Got it</button>
+    </div>
+  </div>
+
+  <!-- Main card -->
+  <div class="page-center">
+    <div class="card-ring">
+      <div class="card">
+
+        <!-- LEFT: Branding -->
+        <div class="brand-panel">
+          <div class="brand-glow"></div>
+          <div class="brand-content">
+            <div class="logo-badge">🏥</div>
+            <div class="brand-title">Emergency<br>Medical ID</div>
+            <div class="brand-sub">Secure Health System</div>
+
+            <div class="stat-pills">
+              <div class="stat-pill">
+                <div class="pill-dot dot-green"></div>
+                <span>System Online</span>
+              </div>
+              <div class="stat-pill">
+                <div class="pill-dot dot-cyan"></div>
+                <span>DB Connected</span>
+              </div>
+              <div class="stat-pill">
+                <div class="pill-dot dot-purple"></div>
+                <span>TLS 1.3 Secured</span>
+              </div>
+            </div>
+
+            <div class="sys-time-bar">
+              SYS_TIME: <span id="sysTime">--:--:--</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Form -->
+        <div class="form-panel">
+          <div class="form-header">
+      <h2>Patient Portal</h2>
+      <p>Access your emergency medical QR card</p>
+    </div>
+          <!-- Step breadcrumb -->
+          <div class="breadcrumb">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div class="step-num">1</div>
+              <span>Credentials</span>
+            </div>
+            <div class="step-line"></div>
+            <div style="display:flex;align-items:center;gap:6px;opacity:0.35;">
+              <div class="step-num" style="background:rgba(167,139,250,0.35);">2</div>
+              <span>Dashboard</span>
+            </div>
+          </div>
+
+          <!-- Error banner -->
+          <div id="globalError"></div>
+
+          <form id="loginForm" novalidate>
+
+            <!-- User ID -->
+            <div class="form-group">
+              <label for="userId">
+                <span class="lbl-idx">01</span>
+                User ID
+              </label>
+              <div class="input-wrap">
+                <input type="text" id="userId" placeholder="Enter your unique User ID" autocomplete="username"/>
+                <span class="input-icon">👤</span>
+              </div>
+              <span class="field-error" id="userIdError"></span>
+            </div>
+
+            <!-- Password -->
+            <div class="form-group">
+              <label for="password">
+                <span class="lbl-idx">02</span>
+                Password
+              </label>
+              <div class="input-wrap">
+                <input type="password" id="password" placeholder="Min 6 characters" autocomplete="current-password"/>
+                <span class="input-icon">🔒</span>
+                <button type="button" class="toggle-pw" id="togglePw" aria-label="Toggle password">👁️</button>
+              </div>
+              <span class="field-error" id="passwordError"></span>
+            </div>
+
+            <!-- Options -->
+            <div class="options-row">
+              <label class="remember">
+                <input type="checkbox" id="rememberMe"/>
+                Remember me
+              </label>
+              <a href="#" class="forgot" onclick="openForgot(event)">Forgot Password?</a>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="btn-login" id="loginBtn">
+              <div class="spinner" id="spinner"></div>
+              <span id="btnText">Sign In &nbsp;→</span>
+            </button>
+
+          </form>
+
+      <p style="text-align:center;margin-top:16px;font-size:0.8rem;color:var(--text3);font-family:'DM Mono',monospace;">New to HealthSync? <a href="register.html" style="color:var(--accent);text-decoration:none;">Create Account →</a></p>
+
+          <div class="security-row">
+            <div class="sec-dot"></div>
+            End-to-end encrypted &nbsp;|&nbsp; HealthSync v2.0
+          </div>
+        </div>
+
+      </div><!-- .card -->
+    </div><!-- .card-ring -->
+  </div>
+
+  <script>
+    /* ── Clock ── */
+    function updateClock() {
+      const now = new Date();
+      const hh  = String(now.getHours()).padStart(2,'0');
+      const mm  = String(now.getMinutes()).padStart(2,'0');
+      const ss  = String(now.getSeconds()).padStart(2,'0');
+      const el  = document.getElementById('sysTime');
+      if (el) el.textContent = `${hh}:${mm}:${ss}`;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    /* ── Users (same as before) ── */
+    const USERS = {
+      'admin001':  'admin@123',
+      'user_yash': 'yash2025',
+      'medic01':   'medic@01',
+      'demo':      'demo12',
+    };
+
+    /* ── Remember Me restore ── */
+    window.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('rememberedUserId');
+      if (saved) {
+        document.getElementById('userId').value = saved;
+        document.getElementById('rememberMe').checked = true;
+      }
+    });
+
+    /* ── Toggle password ── */
+    document.getElementById('togglePw').addEventListener('click', () => {
+      const pw  = document.getElementById('password');
+      const btn = document.getElementById('togglePw');
+      const show = pw.type === 'password';
+      pw.type = show ? 'text' : 'password';
+      btn.textContent = show ? '🙈' : '👁️';
+    });
+
+    /* ── Clear errors on input ── */
+    ['userId','password'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        clearError(id);
+        document.getElementById('globalError').style.display = 'none';
+      });
+    });
+
+    function setError(fieldId, msg) {
+      const el = document.getElementById(fieldId + 'Error');
+      if (!el) return;
+      el.textContent = msg;
+      document.getElementById(fieldId).classList.add('error-field');
+      el.style.animation = 'none'; void el.offsetWidth; el.style.animation = '';
+    }
+    function clearError(fieldId) {
+      const el = document.getElementById(fieldId + 'Error');
+      if (el) el.textContent = '';
+      document.getElementById(fieldId).classList.remove('error-field');
+    }
+
+    /* ── Submit ── */
+    document.getElementById('loginForm').addEventListener('submit', async e => {
+      e.preventDefault();
+
+      const userId   = document.getElementById('userId').value.trim();
+      const password = document.getElementById('password').value;
+      const remember = document.getElementById('rememberMe').checked;
+      const globalEl = document.getElementById('globalError');
+
+      clearError('userId'); clearError('password');
+      globalEl.style.display = 'none';
+
+      let valid = true;
+      if (!userId)             { setError('userId', '// ERR: User ID cannot be empty'); valid = false; }
+      if (password.length < 6) { setError('password', '// ERR: Password must be min 6 chars'); valid = false; }
+      if (!valid) return;
+
+      const btn     = document.getElementById('loginBtn');
+      const spinner = document.getElementById('spinner');
+      const btnText = document.getElementById('btnText');
+      btn.disabled          = true;
+      spinner.style.display = 'block';
+      btnText.textContent   = 'Authenticating…';
+
+      await new Promise(r => setTimeout(r, 700));
+
+      // We optionally keep built-in demo logic, but treat it functionally as a returning patient
+      if (userId in USERS && USERS[userId] === password) {
+        doLoginSuccess(userId, remember);
+        return;
+      }
+
+      // Then check database (for accounts registered via register.html - Patients)
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId, password })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          doLoginSuccess(userId, remember);
+          return;
+        } else {
+          // Show specific error
+          if (res.status === 401 && data.error && data.error.includes('User ID')) {
+            setError('userId', '// ERR: Invalid User ID — not found in system');
+            showBanner('Invalid User ID. Please check and try again.');
+          } else {
+            setError('password', '// ERR: Incorrect password');
+            showBanner('Incorrect password. Please try again.');
+          }
+        }
+      } catch (_) {
+        // Server unavailable — fallback
+        setError('userId', '// ERR: Cannot connect to server');
+        showBanner('Server unavailable. Contact your administrator.');
+      }
+
+      resetBtn();
+    });
+
+    function doLoginSuccess(userId, remember) {
+      if (remember) localStorage.setItem('rememberedUserId', userId);
+      else          localStorage.removeItem('rememberedUserId');
+      sessionStorage.setItem('loggedInUser', userId);
+      
+      // Show overlay
+      document.getElementById('successOverlay').classList.add('show');
+      
+      // Always route returning patients to their QR card page
+      setTimeout(() => { window.location.href = 'qr.html'; }, 1800);
+    }
+
+    function showBanner(msg) {
+      const el = document.getElementById('globalError');
+      el.textContent = '⚠ ' + msg;
+      el.style.display = 'block';
+      el.style.animation = 'none'; void el.offsetWidth; el.style.animation = 'shake 0.35s ease';
+    }
+    function resetBtn() {
+      document.getElementById('loginBtn').disabled    = false;
+      document.getElementById('spinner').style.display = 'none';
+      document.getElementById('btnText').textContent   = 'Sign In →';
+    }
+
+    function openForgot(e)  { if(e) e.preventDefault(); document.getElementById('forgotOverlay').classList.add('show'); }
+    function closeForgot(e) {
+      if (e && e.target !== document.getElementById('forgotOverlay')) return;
+      document.getElementById('forgotOverlay').classList.remove('show');
+    }
+  </script>
+</body>
+</html>

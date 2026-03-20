@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Records Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2d5a3d 0%, #5a9b6f 100%);
+            min-height: 100vh;
+            padding: 35px 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 45px 40px;
+            border-radius: 18px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+            text-align: center;
+            border: 2px solid rgba(90, 155, 111, 0.1);
+            animation: slideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        header h1 {
+            color: #2d5a3d;
+            margin-bottom: 12px;
+            font-size: 42px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        header p {
+            color: #999;
+            font-size: 16px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .controls {
+            background: white;
+            padding: 28px 35px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            margin-bottom: 40px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            border: 1px solid rgba(90, 155, 111, 0.08);
+        }
+
+        button {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2d5a3d 0%, #3f7d52 100%);
+            color: white;
+            box-shadow: 0 6px 18px rgba(45, 90, 61, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(45, 90, 61, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f5f3f0;
+            color: #2d5a3d;
+            border: 2px solid #d9d1c8;
+            font-weight: 700;
+        }
+
+        .btn-secondary:hover {
+            background: #e8dcd1;
+            border-color: #3f7d52;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 12px;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0d5c7;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+            font-weight: 500;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #3f7d52;
+            box-shadow: 0 0 0 3px rgba(63, 125, 82, 0.1);
+        }
+
+        .stats {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            margin-bottom: 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            border: 1px solid rgba(90, 155, 111, 0.08);
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 28px;
+            background: linear-gradient(135deg, #2d5a3d 0%, #3f7d52 100%);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(45, 90, 61, 0.15);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+            pointer-events: none;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 15px 40px rgba(45, 90, 61, 0.25);
+        }
+
+        .stat-card h3 {
+            font-size: 13px;
+            opacity: 0.95;
+            margin-bottom: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card .number {
+            font-size: 40px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .records-table {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            border: 1px solid rgba(212, 165, 116, 0.08);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #2d5a3d 0%, #3f7d52 100%);
+            color: white;
+        }
+
+        th {
+            padding: 20px 15px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 18px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        tbody tr:hover {
+            background: #faf8f5;
+            box-shadow: inset 0 0 10px rgba(90, 155, 111, 0.1);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 8px 14px;
+            font-size: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-view {
+            background: #2d5a3d;
+            color: white;
+            box-shadow: 0 4px 12px rgba(45, 90, 61, 0.2);
+        }
+
+        .btn-view:hover {
+            background: #1f4129;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(45, 90, 61, 0.3);
+        }
+
+        .btn-delete {
+            background: #ff6b6b;
+            color: white;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.25);
+        }
+
+        .btn-delete:hover {
+            background: #e74c3c;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(255, 107, 107, 0.35);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3f7d52;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state h2 {
+            margin-bottom: 10px;
+            color: #2d5a3d;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close {
+            color: #999;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .modal h2 {
+            color: #2d5a3d;
+            margin-bottom: 20px;
+        }
+
+        .detail-field {
+            margin-bottom: 15px;
+        }
+
+        .detail-field label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-field value {
+            display: block;
+            color: #666;
+            font-size: 14px;
+            padding: 8px;
+            background: #faf8f5;
+            border-radius: 5px;
+        }
+
+        .photo-preview {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-top: 10px;
+            max-height: 300px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: #333;
+            color: white;
+            border-radius: 8px;
+            z-index: 2000;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .no-data {
+            color: #999;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏥 Medical Records Dashboard</h1>
+            <p>View all stored medical information</p>
+        </header>
+
+        <div class="controls">
+            <button class="btn-primary" onclick="loadRecords()">🔄 Refresh</button>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search by name..." onkeyup="filterRecords()">
+                <button class="btn-secondary" onclick="filterRecords()">🔍 Search</button>
+            </div>
+            <button class="btn-secondary" onclick="exportToCSV()">📥 Export CSV</button>
+            <button class="btn-secondary" onclick="goToForm()">➕ Add New</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Total Records</h3>
+                <div class="number" id="totalCount">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Last Updated</h3>
+                <div class="number" id="lastUpdate">-</div>
+            </div>
+        </div>
+
+        <div class="records-table">
+            <div id="loading" class="loading" style="display:none;">
+                <div class="spinner"></div>
+                Loading records...
+            </div>
+            
+            <div id="emptyState" class="empty-state" style="display:none;">
+                <h2>No Records Yet</h2>
+                <p>Fill out the form and generate a QR code to add medical records.</p>
+                <button class="btn-primary" style="margin-top:20px;" onclick="goToForm()">Go to Form</button>
+            </div>
+
+            <table id="recordsTable" style="display:none;">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Blood Type</th>
+                        <th>Allergies</th>
+                        <th>Emergency Contact</th>
+                        <th>Last Updated</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="recordsBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Medical Record Details</h2>
+            <div id="detailContent"></div>
+        </div>
+    </div>
+
+    <script>
+        let allRecords = [];
+
+        // Load records on page load
+        document.addEventListener('DOMContentLoaded', loadRecords);
+
+        async function loadRecords() {
+            const loading = document.getElementById('loading');
+            const emptyState = document.getElementById('emptyState');
+            const table = document.getElementById('recordsTable');
+            
+            loading.style.display = 'block';
+            emptyState.style.display = 'none';
+            table.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/all-records');
+                const data = await response.json();
+
+                if (data.success && data.records.length > 0) {
+                    allRecords = data.records;
+                    displayRecords(allRecords);
+                    
+                    // Update stats
+                    document.getElementById('totalCount').textContent = allRecords.length;
+                    
+                    const latestDate = allRecords[allRecords.length - 1][7] || '-';
+                    const formattedDate = new Date(latestDate).toLocaleDateString();
+                    document.getElementById('lastUpdate').textContent = formattedDate;
+
+                    table.style.display = 'table';
+                } else {
+                    emptyState.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading records:', error);
+                showToast('Error loading records', 'error');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        function displayRecords(records) {
+            const tbody = document.getElementById('recordsBody');
+            tbody.innerHTML = '';
+
+            records.forEach(record => {
+                const row = document.createElement('tr');
+                const date = new Date(record[7]).toLocaleDateString();
+                
+                row.innerHTML = `
+                    <td>${record[1] || 'N/A'}</td>
+                    <td>${record[2] || 'N/A'}</td>
+                    <td>${record[3] || 'N/A'}</td>
+                    <td>${record[5] || 'N/A'}</td>
+                    <td>${date}</td>
+                    <td class="actions">
+                        <button class="btn-small btn-view" onclick="viewDetails('${record[0]}')">View</button>
+                        <button class="btn-small btn-delete" onclick="deleteRecord('${record[0]}', '${record[1]}')">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function filterRecords() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allRecords.filter(record => 
+                (record[1] || '').toLowerCase().includes(searchTerm)
+            );
+            displayRecords(filtered);
+        }
+
+        async function viewDetails(userId) {
+            try {
+                const response = await fetch(`/api/get-medical-data/${userId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    let detailHTML = `
+                        <div class="detail-field">
+                            <label>ID</label>
+                            <value>${data.id}</value>
+                        </div>
+                        <div class="detail-field">
+                            <label>Name</label>
+                            <value>${data.name || 'N/A'}</value>
+                        </div>
+                        <div class="detail-field">
+                            <label>Blood Type</label>
+                            <value>${data.blood || 'N/A'}</value>
+                        </div>
+                        <div class="detail-field">
+                            <label>Allergies</label>
+                            <value>${data.allergy || 'N/A'}</value>
+                        </div>
+                        <div class="detail-field">
+                            <label>Medical Conditions</label>
+                            <value>${data.condition || 'N/A'}</value>
+                        </div>
+                        <div class="detail-field">
+                            <label>Emergency Contact</label>
+                            <value>${data.contact || 'N/A'}</value>
+                        </div>
+                        <div class="detail-field">
+                            <label>Last Updated</label>
+                            <value>${new Date(data.updated_at).toLocaleString()}</value>
+                        </div>
+                    `;
+
+                    if (data.photo) {
+                        detailHTML += `
+                            <div class="detail-field">
+                                <label>Photo</label>
+                                <img src="${data.photo}" alt="Photo" class="photo-preview">
+                            </div>
+                        `;
+                    }
+
+                    document.getElementById('detailContent').innerHTML = detailHTML;
+                    document.getElementById('detailModal').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error fetching details:', error);
+                showToast('Error loading details', 'error');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').style.display = 'none';
+        }
+
+        async function deleteRecord(userId, name) {
+            if (!confirm(`Are you sure you want to delete ${name}'s record?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/delete-medical-data/${userId}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast('Record deleted successfully', 'success');
+                    loadRecords();
+                } else {
+                    showToast('Error deleting record', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting record:', error);
+                showToast('Error deleting record', 'error');
+            }
+        }
+
+        function exportToCSV() {
+            if (allRecords.length === 0) {
+                showToast('No records to export', 'warning');
+                return;
+            }
+
+            let csv = 'ID,Name,Blood Type,Allergies,Conditions,Contact,Created,Updated\n';
+            allRecords.forEach(record => {
+                csv += `"${record[0]}","${record[1] || ''}","${record[2] || ''}","${record[3] || ''}","${record[4] || ''}","${record[5] || ''}","${record[7] || ''}","${record[8] || ''}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'medical_records.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            showToast('CSV exported successfully', 'success');
+        }
+
+        function goToForm() {
+            window.location.href = '/';
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            toast.style.background = type === 'success' ? '#4caf50' : type === 'error' ? '#f44336' : '#2196f3';
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('detailModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

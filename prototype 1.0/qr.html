@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Medical QR Code</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2d5a3d 0%, #5a9b6f 100%);
+            margin: 0;
+            padding: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .qr-container {
+            background: linear-gradient(to bottom, #faf8f5 0%, #f5f3f0 100%);
+            padding: 55px 50px;
+            border-radius: 22px;
+            box-shadow: 0 25px 70px rgba(45, 90, 61, 0.2);
+            max-width: 550px;
+            width: 100%;
+            animation: slideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-align: center;
+            border: 2px solid rgba(90, 155, 111, 0.15);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            background: linear-gradient(135deg, #2d5a3d 0%, #3f7d52 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            font-size: 36px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: #999;
+            margin-bottom: 35px;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, rgba(90, 155, 111, 0.08) 0%, rgba(90, 155, 111, 0.03) 100%);
+            border-left: 5px solid #3f7d52;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: left;
+            animation: fadeInUp 0.6s ease-out 0.2s both;
+            box-shadow: 0 4px 15px rgba(45, 90, 61, 0.08);
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(212, 165, 116, 0.2);
+            font-size: 14px;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 700;
+            color: #2d5a3d;
+            letter-spacing: 0.3px;
+        }
+
+        .info-value {
+            color: #777;
+            text-align: right;
+            max-width: 50%;
+            word-break: break-word;
+            font-weight: 600;
+        }
+
+        #qrcode {
+            background-color: white;
+            padding: 25px;
+            border-radius: 15px;
+            display: inline-block;
+            margin: 35px 0;
+            box-shadow: 0 12px 35px rgba(45, 90, 61, 0.15);
+            animation: fadeInUp 0.6s ease-out 0.4s both;
+        }
+
+        #qrcode canvas {
+            display: block;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+
+        button {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: fadeInUp 0.6s ease-out both;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:nth-child(1) { animation-delay: 0.55s; }
+        button:nth-child(2) { animation-delay: 0.65s; }
+        button:nth-child(3) { animation-delay: 0.75s; }
+        button:nth-child(4) { animation-delay: 0.85s; }
+
+        .btn-download {
+            background: linear-gradient(135deg, #2d5a3d 0%, #3f7d52 100%);
+            color: white;
+        }
+
+        .btn-download:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(45, 90, 61, 0.3);
+        }
+
+        .btn-edit {
+            background-color: #f5f3f0;
+            color: #2d5a3d;
+            border: 2px solid #d9d1c8;
+            font-weight: 700;
+        }
+
+        .btn-edit:hover {
+            background-color: #e8dcd1;
+            border-color: #3f7d52;
+            transform: translateY(-2px);
+        }
+
+        .btn-dashboard {
+            background: linear-gradient(135deg, #5a9b6f 0%, #2d5a3d 100%);
+            color: white;
+        }
+
+        .btn-dashboard:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(45, 90, 61, 0.3);
+        }
+
+        button:active {
+            transform: translateY(-1px);
+        }
+
+        .print-btn {
+            background: linear-gradient(135deg, #2d5a3d 0%, #3f7d52 100%);
+            color: white;
+        }
+
+        .print-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(45, 90, 61, 0.3);
+        }
+
+        .timestamp {
+            color: #999;
+            font-size: 12px;
+            margin-top: 25px;
+            font-style: italic;
+            font-weight: 500;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #3f7d52 0%, #5a9b6f 100%);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            animation: slideInRight 0.4s ease-out;
+            z-index: 1000;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .toast.success {
+            background: linear-gradient(135deg, #00c853 0%, #00acc1 100%);
+        }
+
+        .toast.error {
+            background: linear-gradient(135deg, #ff5252 0%, #ff6e40 100%);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .qr-container {
+                padding: 35px 25px;
+                border-radius: 18px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            #qrcode {
+                padding: 18px;
+            }
+
+            .button-group {
+                gap: 10px;
+            }
+
+            button {
+                padding: 12px 18px;
+                font-size: 12px;
+            }
+
+            .info-item {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .info-value {
+                text-align: left;
+                max-width: 100%;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .qr-container {
+                box-shadow: none;
+                padding: 20px;
+            }
+
+            .button-group {
+                display: none;
+            }
+
+            .subtitle {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="qr-container">
+        <h1>Your Medical ID</h1>
+        <p class="subtitle">Emergency QR Code</p>
+
+        <div class="info-card" id="infoCard">
+            <!-- Patient info will be populated here -->
+        </div>
+
+        <div id="qrcode"></div>
+
+        <div class="timestamp" id="timestamp"></div>
+
+        <div class="button-group">
+            <button class="btn-download" onclick="downloadQR()">Download QR Code</button>
+            <button class="print-btn" onclick="window.print()">Print</button>
+
+            <button class="btn-edit" onclick="goBackToForm()">Edit Information</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        // Toast notification system
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+
+        // Load data and generate QR code
+        window.addEventListener('DOMContentLoaded', function() {
+            loadAndDisplayQR();
+        });
+
+        function loadAndDisplayQR() {
+            const savedData = localStorage.getItem('medicalData');
+            
+            if (!savedData) {
+                showToast('No medical data found. Redirecting...', 'error');
+                setTimeout(() => {
+                    window.location.href = 'sync.html';
+                }, 2000);
+                return;
+            }
+
+            try {
+                const medicalData = JSON.parse(savedData);
+                displayPatientInfo(medicalData);
+                generateQRCode(medicalData);
+            } catch (error) {
+                showToast('Error loading data!', 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        function displayPatientInfo(data) {
+            const infoCard = document.getElementById('infoCard');
+            let infoHTML = '';
+
+            if (data.name) infoHTML += `<div class="info-item"><span class="info-label">Name:</span><span class="info-value">${escapeHtml(data.name)}</span></div>`;
+            if (data.blood) infoHTML += `<div class="info-item"><span class="info-label">Blood Group:</span><span class="info-value">${escapeHtml(data.blood)}</span></div>`;
+            if (data.allergy) infoHTML += `<div class="info-item"><span class="info-label">Allergies:</span><span class="info-value">${escapeHtml(data.allergy)}</span></div>`;
+            if (data.condition) infoHTML += `<div class="info-item"><span class="info-label">Medical Condition:</span><span class="info-value">${escapeHtml(data.condition)}</span></div>`;
+            if (data.contact) infoHTML += `<div class="info-item"><span class="info-label">Emergency Contact:</span><span class="info-value">${escapeHtml(data.contact)}</span></div>`;
+
+            infoCard.innerHTML = infoHTML || '<p style="color: #999;">No additional information provided.</p>';
+
+            // Display timestamp
+            if (data.timestamp) {
+                const date = new Date(data.timestamp);
+                const formattedDate = date.toLocaleString();
+                document.getElementById('timestamp').textContent = `Generated: ${formattedDate}`;
+            }
+        }
+
+        function generateQRCode(data) {
+            const qrContainer = document.getElementById('qrcode');
+            
+            // Check if running on server with API
+            if (window.location.hostname !== 'file') {
+                // Use server API to generate QR with absolute URL
+                fetch('/api/generate-qr-url', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        // Clear previous QR code
+                        qrContainer.innerHTML = '';
+                        
+                        // Create new QR code with absolute URL
+                        new QRCode(qrContainer, {
+                            text: result.qr_url,
+                            width: 256,
+                            height: 256,
+                            colorDark: "#000000",
+                            colorLight: "#ffffff",
+                            correctLevel: QRCode.CorrectLevel.H
+                        });
+                        
+                        showToast(`QR Code generated! Accessible at: ${result.local_ip}:${result.port}`, 'success');
+                    } else {
+                        showToast('Error generating QR code: ' + result.error, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('API Error:', error);
+                    showToast('Error: Server not running. Please start the Flask server.', 'error');
+                    // Fallback to local generation
+                    generateQRCodeLocal(data, qrContainer);
+                });
+            } else {
+                // Fallback for local file access
+                generateQRCodeLocal(data, qrContainer);
+            }
+        }
+
+        function generateQRCodeLocal(data, qrContainer) {
+            const qrData = JSON.stringify(data);
+            const encodedData = btoa(qrData);
+            const viewerURL = `viewer.html?data=${encodeURIComponent(encodedData)}`;
+            
+            try {
+                qrContainer.innerHTML = '';
+                new QRCode(qrContainer, {
+                    text: viewerURL,
+                    width: 256,
+                    height: 256,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+                showToast('QR Code generated (local mode - may not work on phone if not on network)', 'warning');
+            } catch (error) {
+                showToast('Error generating QR code!', 'error');
+                console.error('QR Error:', error);
+            }
+        }
+
+        function downloadQR() {
+            const canvas = document.querySelector('#qrcode canvas');
+            if (canvas) {
+                const link = document.createElement('a');
+                link.download = 'medical-qr-code.png';
+                link.href = canvas.toDataURL();
+                link.click();
+                showToast('QR Code downloaded! ✓', 'success');
+            }
+        }
+
+        function goBackToForm() {
+            window.location.href = 'sync.html';
+        }
+
+        function viewDashboard() {
+            window.location.href = 'dashboard.html';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

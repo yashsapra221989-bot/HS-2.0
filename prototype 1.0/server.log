@@ -1,0 +1,404 @@
+
+============================================================
+[HOSPITAL] Emergency Medical QR Code Server
+============================================================
+
+Server is running!
+
+[PHONE] Access from your phone/computer:
+   192.168.1.6:5000
+
+[URL] Full URL:
+   http://192.168.1.6:5000
+
+[QR] To scan from phone on same network:
+   1. Open browser on phone
+   2. Go to: http://192.168.1.6:5000
+   3. Fill the form and generate QR code
+   4. Scan the QR code with any phone camera/QR scanner
+
+============================================================
+
+ * Serving Flask app 'server'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.6:5000
+Press CTRL+C to quit
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 791-912-253
+ * Detected change in 'C:\\Users\\Yash\\Downloads\\sync\\test_save.py', reloading
+
+============================================================
+[HOSPITAL] Emergency Medical QR Code Server
+============================================================
+
+Server is running!
+
+[PHONE] Access from your phone/computer:
+   192.168.1.6:5000
+
+[URL] Full URL:
+   http://192.168.1.6:5000
+
+[QR] To scan from phone on same network:
+   1. Open browser on phone
+   2. Go to: http://192.168.1.6:5000
+   3. Fill the form and generate QR code
+   4. Scan the QR code with any phone camera/QR scanner
+
+============================================================
+
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 791-912-253
+ * Detected change in 'C:\\Users\\Yash\\Downloads\\sync\\test_save.py', reloading
+
+============================================================
+[HOSPITAL] Emergency Medical QR Code Server
+============================================================
+
+Server is running!
+
+[PHONE] Access from your phone/computer:
+   192.168.1.6:5000
+
+[URL] Full URL:
+   http://192.168.1.6:5000
+
+[QR] To scan from phone on same network:
+   1. Open browser on phone
+   2. Go to: http://192.168.1.6:5000
+   3. Fill the form and generate QR code
+   4. Scan the QR code with any phone camera/QR scanner
+
+============================================================
+
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 791-912-253
+ * Detected change in 'C:\\Users\\Yash\\Downloads\\sync\\create_multiple_records.py', reloading
+
+============================================================
+[HOSPITAL] Emergency Medical QR Code Server
+============================================================
+
+Server is running!
+
+[PHONE] Access from your phone/computer:
+   192.168.1.6:5000
+
+[URL] Full URL:
+   http://192.168.1.6:5000
+
+[QR] To scan from phone on same network:
+   1. Open browser on phone
+   2. Go to: http://192.168.1.6:5000
+   3. Fill the form and generate QR code
+   4. Scan the QR code with any phone camera/QR scanner
+
+============================================================
+
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 791-912-253
+ * Detected change in 'C:\\Users\\Yash\\Downloads\\sync\\create_multiple_records.py', reloading
+
+============================================================
+[HOSPITAL] Emergency Medical QR Code Server
+============================================================
+
+Server is running!
+
+[PHONE] Access from your phone/computer:
+   192.168.1.6:5000
+
+[URL] Full URL:
+   http://192.168.1.6:5000
+
+[QR] To scan from phone on same network:
+   1. Open browser on phone
+   2. Go to: http://192.168.1.6:5000
+   3. Fill the form and generate QR code
+   4. Scan the QR code with any phone camera/QR scanner
+
+============================================================
+
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 791-912-253
+ * Detected change in 'C:\\Users\\Yash\\Downloads\\sync\\server.py', reloading
+
+============================================================
+[HOSPITAL] Emergency Medical QR Code Server
+============================================================
+
+Server is running!
+
+[PHONE] Access from your phone/computer:
+   192.168.1.6:5000
+
+[URL] Full URL:
+   http://192.168.1.6:5000
+
+[QR] To scan from phone on same network:
+   1. Open browser on phone
+   2. Go to: http://192.168.1.6:5000
+   3. Fill the form and generate QR code
+   4. Scan the QR code with any phone camera/QR scanner
+
+============================================================
+
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 791-912-253
+ * Detected change in 'C:\\Users\\Yash\\Downloads\\sync\\server.py', reloading
+
+============================================================
+[HOSPITAL] Emergency Medical QR Code Server
+============================================================
+
+Server is running!
+
+[PHONE] Access from your phone/computer:
+   192.168.1.6:5000
+
+[URL] Full URL:
+   http://192.168.1.6:5000
+
+[QR] To scan from phone on same network:
+   1. Open browser on phone
+   2. Go to: http://192.168.1.6:5000
+   3. Fill the form and generate QR code
+   4. Scan the QR code with any phone camera/QR scanner
+
+============================================================
+
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 791-912-253
+/2026 23:45:48] "DELETE /api/delete-medical-data/test_user_123 HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 23:45:48] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 23:45:50] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 23:45:51] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 23:45:51] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 23:45:52] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 23:45:52] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 23:45:52] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 23:45:52] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 23:45:53] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 23:45:53] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 23:45:53] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 23:45:53] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 23:45:53] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 23:45:53] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 23:47:15] "GET /api/all-records HTTP/1.1" 200 -
+192.168.1.6 - - [11/Mar/2026 23:47:26] "GET / HTTP/1.1" 200 -
+192.168.1.6 - - [11/Mar/2026 23:47:26] "GET /script.js HTTP/1.1" 200 -
+192.168.1.6 - - [11/Mar/2026 23:47:26] "GET /favicon.ico HTTP/1.1" 404 -
+192.168.1.6 - - [11/Mar/2026 23:47:32] "GET / HTTP/1.1" 200 -
+192.168.1.6 - - [11/Mar/2026 23:47:32] "GET /script.js HTTP/1.1" 200 -
+192.168.1.6 - - [11/Mar/2026 23:47:37] "GET / HTTP/1.1" 200 -
+192.168.1.6 - - [11/Mar/2026 23:47:37] "GET /script.js HTTP/1.1" 200 -
+192.168.1.6 - - [11/Mar/2026 23:47:58] "GET /dashboard.html HTTP/1.1" 200 -
+192.168.1.6 - - [11/Mar/2026 23:47:58] "GET /api/all-records HTTP/1.1" 200 -
+192.168.1.6 - - [11/Mar/2026 23:48:02] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 23:48:38] "GET /api/all-records HTTP/1.1" 200 -
+ * Detected change in 'C:\\Users\\Yash\\Downloads\\sync\\create_multiple_records.py', reloading
+
+============================================================
+[HOSPITAL] Emergency Medical QR Code Server
+============================================================
+
+Server is running!
+
+[PHONE] Access from your phone/computer:
+   192.168.1.6:5000
+
+[URL] Full URL:
+   http://192.168.1.6:5000
+
+[QR] To scan from phone on same network:
+   1. Open browser on phone
+   2. Go to: http://192.168.1.6:5000
+   3. Fill the form and generate QR code
+   4. Scan the QR code with any phone camera/QR scanner
+
+============================================================
+
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 791-912-253
+127.0.0.1 - - [11/Mar/2026 23:49:29] "POST /api/save-medical-data HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 23:49:32] "POST /api/save-medical-data HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 23:49:35] "POST /api/save-medical-data HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 23:49:37] "POST /api/save-medical-data HTTP/1.1" 200 -
+ * Detected change in 'C:\\Users\\Yash\\Downloads\\sync\\create_multiple_records.py', reloading
+
+============================================================
+[HOSPITAL] Emergency Medical QR Code Server
+============================================================
+
+Server is running!
+
+[PHONE] Access from your phone/computer:
+   192.168.1.6:5000
+
+[URL] Full URL:
+   http://192.168.1.6:5000
+
+[QR] To scan from phone on same network:
+   1. Open browser on phone
+   2. Go to: http://192.168.1.6:5000
+   3. Fill the form and generate QR code
+   4. Scan the QR code with any phone camera/QR scanner
+
+============================================================
+
+[SAVE] Saving data for user: user_1773253167844_john_doe
+[SAVE] Creating new record for user_1773253167844_john_doe
+[SAVE] Successfully saved data for user_1773253167844_john_doe
+[SAVE] Saving data for user: user_1773253170500_jane_smith
+[SAVE] Creating new record for user_1773253170500_jane_smith
+[SAVE] Successfully saved data for user_1773253170500_jane_smith
+[SAVE] Saving data for user: user_1773253173068_bob_johnson
+[SAVE] Creating new record for user_1773253173068_bob_johnson
+[SAVE] Successfully saved data for user_1773253173068_bob_johnson
+[SAVE] Saving data for user: user_1773253175636_alice_williams
+[SAVE] Creating new record for user_1773253175636_alice_williams
+[SAVE] Successfully saved data for user_1773253175636_alice_williams
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 791-912-253
+127.0.0.1 - - [11/Mar/2026 23:49:40] "POST /api/save-medical-data HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 23:50:43] "GET /dashboard.html HTTP/1.1" 200 -
+127.0.0.1 - - [11/Mar/2026 23:50:43] "GET /api/all-records HTTP/1.1" 200 -
+ * Detected change in 'C:\\Users\\Yash\\Downloads\\sync\\server.py', reloading
+
+============================================================
+[HOSPITAL] Emergency Medical QR Code Server
+============================================================
+
+Server is running!
+
+[PHONE] Access from your phone/computer:
+   192.168.1.6:5000
+
+[URL] Full URL:
+   http://192.168.1.6:5000
+
+[QR] To scan from phone on same network:
+   1. Open browser on phone
+   2. Go to: http://192.168.1.6:5000
+   3. Fill the form and generate QR code
+   4. Scan the QR code with any phone camera/QR scanner
+
+============================================================
+
+[SAVE] Saving data for user: user_1773253178207_mike_brown
+[SAVE] Creating new record for user_1773253178207_mike_brown
+[SAVE] Successfully saved data for user_1773253178207_mike_brown
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 791-912-253
+ * Detected change in 'C:\\Users\\Yash\\Downloads\\sync\\server.py', reloading
+
+============================================================
+[HOSPITAL] Emergency Medical QR Code Server
+============================================================
+
+Server is running!
+
+[PHONE] Access from your phone/computer:
+   192.168.1.6:5000
+
+[URL] Full URL:
+   http://192.168.1.6:5000
+
+[QR] To scan from phone on same network:
+   1. Open browser on phone
+   2. Go to: http://192.168.1.6:5000
+   3. Fill the form and generate QR code
+   4. Scan the QR code with any phone camera/QR scanner
+
+============================================================
+
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 791-912-253
+127.0.0.1 - - [12/Mar/2026 00:02:02] "POST /api/save-medical-data HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:15:26] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:15:26] "GET /script.js HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:15:26] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [12/Mar/2026 00:15:37] "POST /api/save-medical-data HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:15:38] "GET /qr.html HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:15:39] "POST /api/generate-qr-url HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:15:40] "GET /dashboard.html HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:15:41] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:16:23] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:16:23] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:16:26] "DELETE /api/delete-medical-data/test_user_123 HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:16:26] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:16:28] "DELETE /api/delete-medical-data/user_1773253178207_mike_brown HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:16:29] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:16:31] "DELETE /api/delete-medical-data/user_1773253175636_alice_williams HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:16:31] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:16:33] "DELETE /api/delete-medical-data/user_1773253173068_bob_johnson HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:16:33] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:16:35] "DELETE /api/delete-medical-data/user_1773253170500_jane_smith HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:16:35] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:16:37] "DELETE /api/delete-medical-data/user_1773253167844_john_doe HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:16:38] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:16:38] "GET /qr.html HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:16:39] "POST /api/generate-qr-url HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:16:43] "GET /sync.html HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:16:43] "GET /script.js HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:16:49] "POST /api/save-medical-data HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:16:50] "GET /qr.html HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:16:51] "POST /api/generate-qr-url HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:16:52] "GET /dashboard.html HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:16:52] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:17:01] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:17:08] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:17:08] "GET /script.js HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:17:20] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:17:21] "GET /script.js HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:17:26] "POST /api/save-medical-data HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:17:27] "GET /qr.html HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:17:28] "POST /api/generate-qr-url HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:17:30] "GET /dashboard.html HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:17:30] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:17:35] "GET /api/all-records HTTP/1.1" 200 -
+192.168.1.6 - - [12/Mar/2026 00:20:50] "GET / HTTP/1.1" 200 -
+192.168.1.6 - - [12/Mar/2026 00:20:50] "GET /script.js HTTP/1.1" 200 -
+192.168.1.6 - - [12/Mar/2026 00:20:50] "GET /favicon.ico HTTP/1.1" 404 -
+192.168.1.6 - - [12/Mar/2026 00:20:55] "GET / HTTP/1.1" 200 -
+192.168.1.6 - - [12/Mar/2026 00:20:55] "GET /script.js HTTP/1.1" 200 -
+192.168.1.6 - - [12/Mar/2026 00:21:16] "GET / HTTP/1.1" 200 -
+192.168.1.6 - - [12/Mar/2026 00:21:16] "GET /script.js HTTP/1.1" 200 -
+192.168.1.6 - - [12/Mar/2026 00:21:16] "GET /favicon.ico HTTP/1.1" 404 -
+192.168.1.6 - - [12/Mar/2026 00:21:36] "GET / HTTP/1.1" 200 -
+192.168.1.6 - - [12/Mar/2026 00:21:36] "GET /script.js HTTP/1.1" 200 -
+192.168.1.6 - - [12/Mar/2026 00:21:36] "GET /favicon.ico HTTP/1.1" 404 -
+192.168.1.6 - - [12/Mar/2026 00:21:42] "GET / HTTP/1.1" 200 -
+192.168.1.6 - - [12/Mar/2026 00:21:42] "GET /script.js HTTP/1.1" 200 -
+192.168.1.6 - - [12/Mar/2026 00:22:23] "GET / HTTP/1.1" 200 -
+192.168.1.6 - - [12/Mar/2026 00:22:23] "GET /script.js HTTP/1.1" 200 -
+192.168.1.6 - - [12/Mar/2026 00:22:23] "GET /favicon.ico HTTP/1.1" 404 -
+192.168.1.6 - - [12/Mar/2026 00:22:29] "GET / HTTP/1.1" 200 -
+192.168.1.6 - - [12/Mar/2026 00:22:29] "GET /script.js HTTP/1.1" 200 -
+192.168.1.6 - - [12/Mar/2026 00:22:33] "GET / HTTP/1.1" 200 -
+192.168.1.6 - - [12/Mar/2026 00:22:33] "GET /script.js HTTP/1.1" 200 -
+192.168.1.6 - - [12/Mar/2026 00:22:39] "GET / HTTP/1.1" 200 -
+192.168.1.6 - - [12/Mar/2026 00:22:39] "GET /script.js HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:23:37] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:23:37] "GET /script.js HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:23:37] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [12/Mar/2026 00:23:49] "POST /api/save-medical-data HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:23:51] "GET /qr.html HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:23:51] "POST /api/generate-qr-url HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:23:52] "GET /dashboard.html HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:23:52] "GET /api/all-records HTTP/1.1" 200 -
+127.0.0.1 - - [12/Mar/2026 00:23:57] "GET /api/all-records HTTP/1.1" 200 -

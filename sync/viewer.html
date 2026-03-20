@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Information - Emergency QR Code</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .viewer-container {
+            background: linear-gradient(to bottom, #ffffff 0%, #f8f9ff 100%);
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 20px;
+        }
+
+        .header-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .header-subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .medical-info {
+            display: grid;
+            gap: 20px;
+        }
+
+        .info-section {
+            background-color: rgba(102, 126, 234, 0.05);
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            animation: fadeIn 0.6s ease-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .info-section:nth-child(1) { animation-delay: 0.1s; }
+        .info-section:nth-child(2) { animation-delay: 0.2s; }
+        .info-section:nth-child(3) { animation-delay: 0.3s; }
+        .info-section:nth-child(4) { animation-delay: 0.4s; }
+        .info-section:nth-child(5) { animation-delay: 0.5s; }
+
+        .info-section.critical {
+            border-left-color: #ff5252;
+            background-color: rgba(255, 82, 82, 0.05);
+        }
+
+        .info-section.important {
+            border-left-color: #ff9800;
+            background-color: rgba(255, 152, 0, 0.05);
+        }
+
+        .info-label {
+            font-weight: 700;
+            color: #333;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-value {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+
+        .empty-value {
+            color: #bbb;
+            font-style: italic;
+        }
+
+        .icon {
+            font-size: 18px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .timestamp {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 30px;
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            min-width: 150px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-secondary {
+            background-color: #f0f0f0;
+            color: #333;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background-color: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #856404;
+            text-align: center;
+        }
+
+        .error-icon {
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+
+        .alert-box {
+            background-color: #fff3cd;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .print-btn {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+        }
+
+        .print-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.6);
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .viewer-container {
+                box-shadow: none;
+                padding: 20px;
+            }
+
+            .action-buttons {
+                display: none;
+            }
+
+            .alert-box {
+                page-break-inside: avoid;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .viewer-container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            button {
+                min-width: 130px;
+                padding: 10px 16px;
+                font-size: 12px;
+            }
+
+            .info-value {
+                font-size: 14px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="viewer-container">
+        <div class="header">
+            <div class="header-icon">🏥</div>
+            <h1>Medical Information</h1>
+            <p class="header-subtitle">Emergency QR Code Data</p>
+        </div>
+
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading medical information...</p>
+        </div>
+
+        <div id="content" style="display: none;">
+            <div id="alert-section"></div>
+            <div class="medical-info" id="medicalInfo"></div>
+            <div class="timestamp" id="timestamp"></div>
+
+            <div class="action-buttons">
+                <button class="btn-primary" onclick="downloadPDF()">Download PDF</button>
+                <button class="btn-primary" onclick="printMedicalInfo()">Print</button>
+                <button class="btn-secondary" onclick="shareInfo()">Share</button>
+            </div>
+        </div>
+
+        <div id="error" style="display: none;">
+            <div class="error-message">
+                <div class="error-icon">⚠️</div>
+                <h2>Invalid QR Code</h2>
+                <p id="errorMessage" style="margin-top: 10px;"></p>
+                <button class="btn-secondary" style="margin-top: 15px;" onclick="location.reload()">Try Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        let currentMedicalData = null;
+
+        // Decode URL parameter and display medical data
+        function loadMedicalData() {
+            try {
+                // Get the 'data' parameter from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const encodedData = urlParams.get('data');
+
+                if (!encodedData) {
+                    showError('No medical data found in QR code. The QR code may be invalid.');
+                    return;
+                }
+
+                // Decode from base64
+                const decodedData = atob(encodedData);
+                const medicalData = JSON.parse(decodedData);
+
+                // Display the data
+                displayMedicalInfo(medicalData);
+                currentMedicalData = medicalData;
+                hideLoading();
+
+            } catch (error) {
+                console.error('Error decoding data:', error);
+                showError('Failed to read QR code data. The code may be corrupted or invalid.');
+            }
+        }
+
+        function displayMedicalInfo(data) {
+            const container = document.getElementById('medicalInfo');
+            let html = '';
+
+            // Critical allergies alert
+            if (data.allergy && data.allergy.trim()) {
+                const alertHTML = `
+                    <div class="alert-box">
+                        <div class="alert-title">⚠️ ALLERGIES</div>
+                        <div>${escapeHtml(data.allergy)}</div>
+                    </div>
+                `;
+                document.getElementById('alert-section').innerHTML = alertHTML;
+            }
+
+            // Name
+            if (data.name && data.name.trim()) {
+                html += `
+                    <div class="info-section">
+                        <div class="info-label"><span class="icon">👤</span>Name</div>
+                        <div class="info-value">${escapeHtml(data.name)}</div>
+                    </div>
+                `;
+            }
+
+            // Blood Group
+            if (data.blood && data.blood.trim()) {
+                html += `
+                    <div class="info-section important">
+                        <div class="info-label"><span class="icon">🩸</span>Blood Group</div>
+                        <div class="info-value">${escapeHtml(data.blood)}</div>
+                    </div>
+                `;
+            }
+
+            // Medical Conditions
+            if (data.condition && data.condition.trim()) {
+                html += `
+                    <div class="info-section">
+                        <div class="info-label"><span class="icon">⚕️</span>Medical Conditions</div>
+                        <div class="info-value">${escapeHtml(data.condition)}</div>
+                    </div>
+                `;
+            }
+
+            // Emergency Contact
+            if (data.contact && data.contact.trim()) {
+                html += `
+                    <div class="info-section">
+                        <div class="info-label"><span class="icon">📞</span>Emergency Contact</div>
+                        <div class="info-value">${escapeHtml(data.contact)}</div>
+                    </div>
+                `;
+            }
+
+            // Timestamp
+            if (data.timestamp) {
+                const date = new Date(data.timestamp);
+                const formattedDate = date.toLocaleString();
+                document.getElementById('timestamp').textContent = `QR Code Generated: ${formattedDate}`;
+            }
+
+            container.innerHTML = html || '<p style="color: #999;">No medical information available.</p>';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+        }
+
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('errorMessage').textContent = message;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function printMedicalInfo() {
+            window.print();
+        }
+
+        function shareInfo() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Medical Information',
+                    text: 'Emergency Medical Information via QR Code',
+                    url: window.location.href
+                }).catch(err => console.log('Share error:', err));
+            } else {
+                // Fallback: copy URL to clipboard
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    alert('Link copied to clipboard!');
+                }).catch(() => {
+                    alert('Unable to share. Please manually share this link.');
+                });
+            }
+        }
+
+        function downloadPDF() {
+            if (!currentMedicalData) {
+                alert('No medical data available to download.');
+                return;
+            }
+
+            const element = document.getElementById('medicalInfo');
+            const opt = {
+                margin: 10,
+                filename: 'Medical_Information.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+            };
+
+            // Create a temporary container for PDF content
+            const pdfContent = document.createElement('div');
+            pdfContent.style.padding = '20px';
+            pdfContent.style.fontFamily = 'Arial, sans-serif';
+
+            // Add header
+            const header = document.createElement('h1');
+            header.textContent = 'EMERGENCY MEDICAL INFORMATION';
+            header.style.textAlign = 'center';
+            header.style.color = '#667eea';
+            header.style.marginBottom = '10px';
+            pdfContent.appendChild(header);
+
+            const subheader = document.createElement('p');
+            subheader.textContent = 'QR Code Emergency Medical ID';
+            subheader.style.textAlign = 'center';
+            subheader.style.color = '#999';
+            subheader.style.marginBottom = '20px';
+            pdfContent.appendChild(subheader);
+
+            // Add separator
+            const separator = document.createElement('hr');
+            separator.style.border = 'none';
+            separator.style.borderTop = '2px solid #667eea';
+            separator.style.marginBottom = '20px';
+            pdfContent.appendChild(separator);
+
+            // Add medical information
+            const infoDiv = document.createElement('div');
+            infoDiv.style.marginBottom = '20px';
+
+            // Add allergies alert if present
+            if (currentMedicalData.allergy && currentMedicalData.allergy.trim()) {
+                const alertDiv = document.createElement('div');
+                alertDiv.style.backgroundColor = '#fff3cd';
+                alertDiv.style.border = '2px solid #ff9800';
+                alertDiv.style.borderRadius = '5px';
+                alertDiv.style.padding = '15px';
+                alertDiv.style.marginBottom = '20px';
+
+                const alertTitle = document.createElement('strong');
+                alertTitle.textContent = '⚠️ ALLERGIES: ';
+                alertTitle.style.color = '#856404';
+                alertDiv.appendChild(alertTitle);
+
+                const alertText = document.createElement('span');
+                alertText.textContent = currentMedicalData.allergy;
+                alertText.style.color = '#856404';
+                alertDiv.appendChild(alertText);
+
+                infoDiv.appendChild(alertDiv);
+            }
+
+            // Add name
+            if (currentMedicalData.name && currentMedicalData.name.trim()) {
+                const nameDiv = document.createElement('p');
+                nameDiv.innerHTML = `<strong>Name:</strong> ${escapeHtml(currentMedicalData.name)}`;
+                nameDiv.style.marginBottom = '10px';
+                nameDiv.style.fontSize = '14px';
+                infoDiv.appendChild(nameDiv);
+            }
+
+            // Add blood group
+            if (currentMedicalData.blood && currentMedicalData.blood.trim()) {
+                const bloodDiv = document.createElement('p');
+                bloodDiv.innerHTML = `<strong>Blood Group:</strong> ${escapeHtml(currentMedicalData.blood)}`;
+                bloodDiv.style.marginBottom = '10px';
+                bloodDiv.style.fontSize = '14px';
+                bloodDiv.style.backgroundColor = '#fff3cd';
+                bloodDiv.style.padding = '10px';
+                bloodDiv.style.borderRadius = '5px';
+                infoDiv.appendChild(bloodDiv);
+            }
+
+            // Add medical conditions
+            if (currentMedicalData.condition && currentMedicalData.condition.trim()) {
+                const conditionDiv = document.createElement('p');
+                conditionDiv.innerHTML = `<strong>Medical Conditions:</strong> ${escapeHtml(currentMedicalData.condition)}`;
+                conditionDiv.style.marginBottom = '10px';
+                conditionDiv.style.fontSize = '14px';
+                infoDiv.appendChild(conditionDiv);
+            }
+
+            // Add emergency contact
+            if (currentMedicalData.contact && currentMedicalData.contact.trim()) {
+                const contactDiv = document.createElement('p');
+                contactDiv.innerHTML = `<strong>Emergency Contact:</strong> ${escapeHtml(currentMedicalData.contact)}`;
+                contactDiv.style.marginBottom = '10px';
+                contactDiv.style.fontSize = '14px';
+                infoDiv.appendChild(contactDiv);
+            }
+
+            pdfContent.appendChild(infoDiv);
+
+            // Add timestamp
+            if (currentMedicalData.timestamp) {
+                const date = new Date(currentMedicalData.timestamp);
+                const formattedDate = date.toLocaleString();
+
+                const footerDiv = document.createElement('div');
+                footerDiv.style.marginTop = '40px';
+                footerDiv.style.paddingTop = '20px';
+                footerDiv.style.borderTop = '1px solid #ddd';
+                footerDiv.style.fontSize = '11px';
+                footerDiv.style.color = '#999';
+                footerDiv.style.textAlign = 'center';
+                footerDiv.innerHTML = `Generated: ${formattedDate}<br/>Emergency Medical ID - Keep this document safe`;
+                pdfContent.appendChild(footerDiv);
+            }
+
+            // Generate PDF
+            html2pdf().set(opt).from(pdfContent).save();
+        }
+
+        // Load data when page loads
+        window.addEventListener('DOMContentLoaded', loadMedicalData);
+    </script>
+</body>
+</html>

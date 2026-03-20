@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emergency Medical Card — HealthSync</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #06080f; --surface: #0d1117; --surface2: #161b27; --surface3: #1e2535;
+      --border: #232d42; --accent: #00c8ff; --green: #00e5a0; --red: #ff4757;
+      --text: #e8edf5; --text2: #8892a4; --text3: #4a5568;
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); padding: 40px 20px; }
+    .grid-bg { position: fixed; inset: 0; background-image: linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+
+    .viewer-container { max-width: 680px; margin: 0 auto; position: relative; z-index: 1; }
+
+    /* Top Badge */
+    .status-badge { background: rgba(0,229,160,0.1); border: 1px solid rgba(0,229,160,0.3); color: var(--green); text-align: center; padding: 12px; border-radius: 12px; font-family: 'DM Mono', monospace; font-size: 0.85rem; font-weight: 500; text-transform: uppercase; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,229,160,0.1); }
+
+    /* Header Profile Card */
+    .profile-header { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 32px; display: flex; align-items: center; gap: 24px; margin-bottom: 24px; }
+    .avatar { width: 80px; height: 80px; border-radius: 24px; background: linear-gradient(135deg, var(--accent), #00ffaa); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: var(--bg); box-shadow: 0 10px 30px rgba(0,200,255,0.2); }
+    .profile-info h1 { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; margin-bottom: 8px; line-height: 1.1; }
+    .profile-info p { color: var(--text2); font-size: 0.95rem; }
+    .profile-info p span { display: inline-block; margin-right: 12px; }
+
+    /* Pulsing Allergy Banner */
+    .allergy-banner { display: none; background: rgba(255,71,87,0.1); border: 1px solid rgba(255,71,87,0.4); color: var(--red); padding: 18px 24px; border-radius: 16px; margin-bottom: 24px; animation: pulse 2s infinite ease-in-out; }
+    .allergy-banner h3 { font-family: 'Syne', sans-serif; font-weight: 800; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255,71,87,0.4); } 70% { box-shadow: 0 0 0 15px rgba(255,71,87,0); } 100% { box-shadow: 0 0 0 0 rgba(255,71,87,0); } }
+
+    /* Detail Grid */
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    .detail-item { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
+    .detail-item.full { grid-column: 1 / -1; }
+    .detail-label { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--text2); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; }
+    .detail-val { font-size: 1.05rem; font-weight: 500; line-height: 1.5; }
+    .detail-val.critical { color: var(--red); font-weight: 700; font-size: 1.2rem; }
+    .empty { color: var(--text3); font-style: italic; font-size: 0.9rem; }
+
+    /* Highlighted Emergency Block */
+    .emergency-block { background: rgba(255,71,87,0.05); border: 1px dashed rgba(255,71,87,0.3); border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 32px; }
+    .emergency-block .detail-label { color: var(--red); font-weight: 600; font-size: 0.8rem; }
+    .emergency-block .phone { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; margin: 8px 0; color: var(--text); }
+    .emergency-block .rel { color: var(--text2); font-size: 0.9rem; }
+
+    footer { text-align: center; font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--text3); padding: 20px; }
+
+    /* Add error state style */
+    .error-card { background: var(--surface); border: 1px solid var(--red); border-radius: 16px; padding: 40px; text-align: center; color: var(--red); display: none; margin-top: 60px; }
+    .error-card h2 { font-family: 'Syne', sans-serif; font-size: 1.5rem; margin-bottom: 12px; }
+    .error-card p { color: var(--text2); font-size: 0.9rem; }
+
+    @media (max-width: 600px) { .detail-grid { grid-template-columns: 1fr; } .profile-header { flex-direction: column; text-align: center; gap: 16px; } }
+  </style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+  
+  <div class="viewer-container" id="contentView">
+    <div class="status-badge">✅ QR Scanned — Read Only</div>
+
+    <div class="profile-header">
+      <div class="avatar" id="vAvatar">--</div>
+      <div class="profile-info">
+        <h1 id="vName">Loading...</h1>
+        <p>
+          <span id="vAge">-- yrs</span> • 
+          <span id="vGender">--</span>
+        </p>
+        <p style="margin-top:8px; font-family:'DM Mono',monospace; font-size:0.75rem; color:var(--text3);" id="vId">ID: Loading...</p>
+      </div>
+    </div>
+
+    <div class="allergy-banner" id="vAllergyBanner">
+      <h3>🚨 CRITICAL ALLERGIES</h3>
+      <div id="vAllergyList"></div>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-item"><div class="detail-label">Blood Group</div><div class="detail-val critical" id="vBlood">--</div></div>
+      <div class="detail-item"><div class="detail-label">Date of Birth</div><div class="detail-val" id="vDob">--</div></div>
+      <div class="detail-item"><div class="detail-label">Weight & Height</div><div class="detail-val" id="vVitals">--</div></div>
+      <div class="detail-item"><div class="detail-label">ABHA ID</div><div class="detail-val" id="vAbha">--</div></div>
+      <div class="detail-item full"><div class="detail-label">Current Medications</div><div class="detail-val" id="vMeds">None recorded</div></div>
+      <div class="detail-item full"><div class="detail-label">Medical Conditions</div><div class="detail-val" id="vConds">None recorded</div></div>
+      <div class="detail-item full"><div class="detail-label">Past Surgeries</div><div class="detail-val" id="vSurg">None recorded</div></div>
+    </div>
+
+    <div class="emergency-block">
+      <div class="detail-label">EMERGENCY CONTACT</div>
+      <div class="phone" id="vPhone">--</div>
+      <div class="rel" id="vRel">--</div>
+    </div>
+
+    <footer>
+      DATA PROVIDED BY PATIENT · HEALTHSYNC INDIA · FOR EMERGENCY USE ONLY
+    </footer>
+  </div>
+
+  <div class="viewer-container error-card" id="errorView">
+    <h2>Record Not Found</h2>
+    <p>The scanned QR code points to a patient record that does not exist or has been deleted from this device.</p>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const id = new URLSearchParams(window.location.search).get('id');
+      const patients = getPatients();
+      const patient = patients.find(p => p.id === id);
+
+      if (!patient) {
+        document.getElementById('contentView').style.display = 'none';
+        document.getElementById('errorView').style.display = 'block';
+        return;
+      }
+
+      // Render Avatar
+      const nm = patient.name || 'Unknown';
+      document.getElementById('vAvatar').textContent = nm.substring(0, 2).toUpperCase();
+      document.getElementById('vName').textContent = nm;
+      document.getElementById('vId').textContent = 'ID: ' + patient.id;
+
+      // Render Age & Gender
+      document.getElementById('vGender').textContent = patient.gender || 'Not specified';
+      if (patient.dob) {
+        const dobDate = new Date(patient.dob);
+        const diffMs = Date.now() - dobDate.getTime();
+        const ageDT = new Date(diffMs); 
+        document.getElementById('vAge').textContent = Math.abs(ageDT.getUTCFullYear() - 1970) + ' yrs';
+      } else {
+        document.getElementById('vAge').textContent = 'Age N/A';
+      }
+
+      // Render Allergy Banner
+      if (patient.allergies && patient.allergies.length > 0) {
+        document.getElementById('vAllergyBanner').style.display = 'block';
+        document.getElementById('vAllergyList').textContent = patient.allergies.join(', ');
+      }
+
+      // Detail blocks
+      const sVal = (id, str) => {
+        const el = document.getElementById(id);
+        if (!str || str.length === 0) { el.innerHTML = '<span class="empty">None recorded</span>'; }
+        else { el.textContent = Array.isArray(str) ? str.join(', ') : str; }
+      };
+
+      document.getElementById('vBlood').textContent = patient.blood || 'Unknown';
+      document.getElementById('vDob').textContent = patient.dob || 'Unknown';
+      
+      const w = patient.weight ? patient.weight + ' kg' : '--';
+      const h = patient.height ? patient.height + ' cm' : '--';
+      document.getElementById('vVitals').textContent = `${w} / ${h}`;
+
+      sVal('vAbha', patient.abha);
+      sVal('vMeds', patient.meds);
+      sVal('vConds', patient.conditions);
+      sVal('vSurg', patient.surgeries);
+
+      // Emergency Contact Highlight
+      document.getElementById('vPhone').textContent = patient.ecPhone || patient.phone || 'No phone provided';
+      const ecN = patient.ecName || 'N/A';
+      const ecR = patient.ecRel || 'N/A';
+      document.getElementById('vRel').textContent = `${ecN} (${ecR})`;
+    });
+  </script>
+</body>
+</html>
