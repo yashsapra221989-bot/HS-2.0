@@ -8,11 +8,16 @@ import os
 import socket
 import sqlite3
 import uuid
+import hashlib
 from datetime import datetime
 
 from flask import Flask, request
 
 app = Flask(__name__, static_folder='public', static_url_path='')
+
+def hash_password(password: str) -> str:
+    """Hash password with SHA-256. For production use bcrypt instead."""
+    return hashlib.sha256(password.encode('utf-8')).hexdigest()
 
 # Add CORS headers to all responses
 @app.after_request
@@ -22,6 +27,12 @@ def add_cors_headers(response):
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     return response
+
+# ✅ FIX: Handle CORS preflight OPTIONS requests explicitly.
+# Without this, browsers block cross-origin requests before they reach the route handler.
+@app.route('/api/<path:path>', methods=['OPTIONS'])
+def handle_options(path):
+    return '', 204
 DATABASE = 'medical_data.db'
 
 # NOTE FOR NETLIFY: SQLite will NOT persist data on Netlify. 
@@ -61,6 +72,21 @@ def init_db():
             doctor TEXT
         )
     ''')
+    # SOS Alerts table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS sos_alerts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT,
+            lat REAL,
+            lon REAL,
+            resolved INTEGER DEFAULT 0,
+            manual_location TEXT
+        )
+    ''')
+    try:
+        c.execute('ALTER TABLE sos_alerts ADD COLUMN manual_location TEXT')
+    except Exception:
+        pass
     # Users table for account credentials
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
@@ -122,11 +148,12 @@ def save_medical_data():
             c.execute('SELECT user_id FROM users WHERE user_id = ?', (user_id,))
             user_exists = c.fetchone()
             if user_exists:
-                c.execute('UPDATE users SET password = ? WHERE user_id = ?', (password, user_id))
+                # ✅ FIX: store hashed password
+                c.execute('UPDATE users SET password = ? WHERE user_id = ?', (hash_password(password), user_id))
             else:
                 c.execute(
                     'INSERT INTO users (user_id, password, created_at) VALUES (?, ?, ?)',
-                    (user_id, password, datetime.now().isoformat())
+                    (user_id, hash_password(password), datetime.now().isoformat())
                 )
 
         # Check if medical record exists
@@ -232,9 +259,9 @@ def register():
 
         now = datetime.now().isoformat()
 
-        # Create user account
+        # Create user account — store hashed password, never plaintext
         c.execute('INSERT INTO users (user_id, password, created_at) VALUES (?, ?, ?)',
-                  (user_id, password, now))
+                  (user_id, hash_password(password), now))
 
         # Create medical record
         c.execute('''
@@ -281,7 +308,8 @@ def login():
 
         if not row:
             return {'success': False, 'error': 'User ID not found'}, 401
-        if row[0] != password:
+        # ✅ FIX: Compare hashed password, not plaintext
+        if row[0] != hash_password(password):
             return {'success': False, 'error': 'Incorrect password'}, 401
 
         return {'success': True, 'user_id': user_id, 'message': 'Login successful'}
@@ -393,7 +421,8 @@ def all_records():
         c = conn.cursor()
         
         c.execute('''
-            SELECT id, name, blood_type, allergies, conditions, emergency_contact, photo, created_at, updated_at
+            SELECT id, name, blood_type, allergies, conditions, emergency_contact, photo, updated_at,
+                   dob, gender, weight, height, abha, meds, surgeries, ecName, ecRel, doctor
             FROM medical_records
             ORDER BY updated_at DESC
         ''')
@@ -401,26 +430,35 @@ def all_records():
         records = c.fetchall()
         conn.close()
         
-        # Convert records to list of lists, excluding photo data for the list view
-        simplified_records = []
-        for record in records:
-            # Return all fields except photo for the list (photo is too large)
-            simplified_records.append([
-                record[0],  # id
-                record[1],  # name
-                record[2],  # blood_type
-                record[3],  # allergies
-                record[4],  # conditions
-                record[5],  # emergency_contact
-                'Yes' if record[6] else 'No',  # photo (boolean string)
-                record[7],  # created_at
-                record[8]   # updated_at
-            ])
+        # Convert records to list of dictionaries matching the frontend needs
+        patient_list = []
+        for row in records:
+            # We skip photo for the list view to save bandwidth
+            patient_list.append({
+                'id': row[0],
+                'name': row[1],
+                'blood': row[2],
+                'allergies': [s.strip() for s in row[3].split(',')] if row[3] else [],
+                'conditions': [s.strip() for s in row[4].split(',')] if row[4] else [],
+                'ecPhone': row[5],
+                'updated_at': row[7],
+                'dob': row[8],
+                'gender': row[9],
+                'weight': row[10],
+                'height': row[11],
+                'abha': row[12],
+                'meds': [s.strip() for s in row[13].split(',')] if row[13] else [],
+                'surgeries': row[14],
+                'ecName': row[15],
+                'ecRel': row[16],
+                'doctor': row[17],
+                'medComplete': True
+            })
         
         return {
             'success': True,
-            'count': len(simplified_records),
-            'records': simplified_records
+            'count': len(patient_list),
+            'records': patient_list
         }
     except Exception as e:
         import traceback
@@ -463,6 +501,60 @@ def delete_medical_data(user_id):
             'error': str(e)
         }, 500
 
+@app.route('/api/sos-alert', methods=['POST'])
+def sos_alert():
+    """Receive an SOS alert with optional GPS coordinates"""
+    try:
+        data = request.json
+        timestamp = data.get('timestamp', datetime.now().isoformat())
+        lat = data.get('lat')
+        lon = data.get('lon')
+        manual_loc = data.get('manual_location', '')
+
+        conn = sqlite3.connect(DATABASE)
+        c = conn.cursor()
+        c.execute('''
+            INSERT INTO sos_alerts (timestamp, lat, lon, resolved, manual_location)
+            VALUES (?, ?, ?, 0, ?)
+        ''', (timestamp, lat, lon, manual_loc))
+        conn.commit()
+        conn.close()
+
+        return {'success': True}
+    except Exception as e:
+        return {'success': False, 'error': str(e)}, 500
+
+@app.route('/api/get-sos-alerts', methods=['GET'])
+def get_sos_alerts():
+    """Get active unresolved SOS alerts for the dashboard"""
+    try:
+        conn = sqlite3.connect(DATABASE)
+        c = conn.cursor()
+        c.execute('SELECT id, timestamp, lat, lon, manual_location FROM sos_alerts WHERE resolved = 0 ORDER BY timestamp DESC')
+        records = c.fetchall()
+        conn.close()
+
+        alerts = [
+            {'id': r[0], 'timestamp': r[1], 'lat': r[2], 'lon': r[3], 'manual_location': r[4]}
+            for r in records
+        ]
+        return {'success': True, 'alerts': alerts}
+    except Exception as e:
+        return {'success': False, 'error': str(e)}, 500
+
+@app.route('/api/resolve-sos-alert/<int:alert_id>', methods=['POST'])
+def resolve_sos_alert(alert_id):
+    """Mark an SOS alert as resolved"""
+    try:
+        conn = sqlite3.connect(DATABASE)
+        c = conn.cursor()
+        c.execute('UPDATE sos_alerts SET resolved = 1 WHERE id = ?', (alert_id,))
+        conn.commit()
+        conn.close()
+        return {'success': True}
+    except Exception as e:
+        return {'success': False, 'error': str(e)}, 500
+
 # Note: The if __name__ == '__main__': block is only for local testing.
 if __name__ == '__main__':
     local_ip = get_local_ip()
@@ -490,4 +582,7 @@ if __name__ == '__main__':
     print(f"{'='*60}")
     print(f"")
     
-    app.run(host='0.0.0.0', port=port, debug=True)
+    # ✅ FIX: Never run with debug=True in production — it exposes a remote code execution console.
+    # Set DEBUG=1 env var only for local development.
+    debug_mode = os.environ.get('DEBUG', '0') == '1'
+    app.run(host='0.0.0.0', port=port, debug=debug_mode)

@@ -1,21 +1,54 @@
-// script.js - JavaScript for Emergency QR Medical ID
+// script.js - HealthSync Core Logic
 
-let userId = null;
+// ─── INJECT TOAST CSS into <head> ───────────────────────────────────────────
+(function injectToastStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            z-index: 9999;
+            padding: 14px 22px;
+            border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #e8edf5;
+            background: #161b27;
+            border: 1px solid #232d42;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            max-width: 320px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .toast.success { border-color: rgba(0,229,160,0.4); color: #00e5a0; }
+        .toast.error   { border-color: rgba(255,71,87,0.4);  color: #ff4757; }
+        .toast.info    { border-color: rgba(0,200,255,0.4);  color: #00c8ff; }
+        .toast.hide    { opacity: 0; transform: translateY(12px); }
+    `;
+    document.head.appendChild(style);
+})();
 
-// Toast notification system
+// ─── TOAST NOTIFICATION ─────────────────────────────────────────────────────
 function showToast(message, type = 'info') {
+    const icons = { success: '✅', error: '❌', info: 'ℹ️' };
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    toast.textContent = message;
+    toast.textContent = (icons[type] || '') + ' ' + message;
     document.body.appendChild(toast);
-    
+
     setTimeout(() => {
         toast.classList.add('hide');
         setTimeout(() => toast.remove(), 400);
     }, 3000);
 }
 
-// Ensure hs_patients array exists
+// ─── LOCALSTORAGE HELPERS ────────────────────────────────────────────────────
 function getPatients() {
     return JSON.parse(localStorage.getItem('hs_patients') || '[]');
 }
@@ -23,86 +56,108 @@ function savePatients(patients) {
     localStorage.setItem('hs_patients', JSON.stringify(patients));
 }
 
-// 1. Register User Logic
+// ─── 1. REGISTER USER ────────────────────────────────────────────────────────
 function registerUser(name, email, phone, password) {
     const patients = getPatients();
-    
-    // Check if email already exists
+
+    if (!name || !email || !password) {
+        document.getElementById('globalError').textContent = 'Name, email and password are required.';
+        return;
+    }
+
+    // Check duplicate email
     if (patients.find(p => p.email === email)) {
         document.getElementById('globalError').textContent = 'Email already registered.';
         return;
     }
-    
+
     // Generate HS-YYYY-XXXX
     const year = new Date().getFullYear();
     const randomNum = Math.floor(1000 + Math.random() * 9000);
     const newId = `HS-${year}-${randomNum}`;
-    
+
     const newUser = {
         id: newId,
-        name: name,
-        email: email,
-        phone: phone,
-        password: password,
+        name,
+        email,
+        phone,
+        password,
         medComplete: false,
         blood: '', dob: '', gender: '', weight: '', height: '', abha: '',
         allergies: [], meds: [], conditions: [], surgeries: '',
         ecName: '', ecRel: '', ecPhone: '', doctor: ''
     };
-    
+
     patients.push(newUser);
     savePatients(patients);
-    
+
     sessionStorage.setItem('loggedInUser', newId);
-    showToast('Account created successfully!', 'success');
-    
-    // Redirection
-    setTimeout(() => {
-        window.location.href = 'sync.html';
-    }, 1000);
+    showToast('Account created! Welcome to HealthSync.', 'success');
+
+    setTimeout(() => { window.location.href = 'sync.html'; }, 1200);
 }
 
-// 2. Login User Logic
-function userLogin(email, password) {
+// ─── 2. LOGIN USER ───────────────────────────────────────────────────────────
+// ✅ FIX: Now verifies against the server database instead of localStorage only.
+// localStorage is kept as a fallback for offline/prototype use.
+async function userLogin(email, password) {
+    if (!email || !password) {
+        document.getElementById('globalError').textContent = 'Email and password are required.';
+        return;
+    }
+
+    // Try server auth first (uses user_id, not email — patients registered via register.html use a user_id)
+    try {
+        const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: email, password })
+        });
+        const data = await res.json();
+        if (data.success) {
+            sessionStorage.setItem('loggedInUser', data.user_id);
+            showToast('Login successful! Redirecting…', 'success');
+            setTimeout(() => { window.location.href = 'qr.html'; }, 1000);
+            return;
+        }
+    } catch (e) {
+        console.warn('[HealthSync] Server unreachable, falling back to local auth.');
+    }
+
+    // Fallback: localStorage (for users registered via old registerUser() path)
     const patients = getPatients();
     const user = patients.find(p => p.email === email);
-    
+
     if (!user) {
-        document.getElementById('globalError').textContent = 'No account found with this email.';
+        document.getElementById('globalError').textContent = 'No account found with this email or user ID.';
         return;
     }
     if (user.password !== password) {
         document.getElementById('globalError').textContent = 'Incorrect password.';
         return;
     }
-    
+
     sessionStorage.setItem('loggedInUser', user.id);
-    showToast('Login successful!', 'success');
-    
+    showToast('Login successful! Redirecting…', 'success');
     setTimeout(() => {
-        if (user.medComplete) window.location.href = 'qr.html';
-        else window.location.href = 'sync.html';
+        window.location.href = user.medComplete ? 'qr.html' : 'sync.html';
     }, 1000);
 }
 
-// 3. Sync HTML form fields to localStorage
+// ─── 3. SAVE MEDICAL DATA TO LOCALSTORAGE ───────────────────────────────────
 function saveMedicalDataToLocal() {
     const loggedInId = sessionStorage.getItem('loggedInUser');
-    if (!loggedInId) return;
+    if (!loggedInId) return false;
 
     const patients = getPatients();
     const index = patients.findIndex(p => p.id === loggedInId);
-    if (index === -1) return;
+    if (index === -1) return false;
 
-    // Read rich fields from sync.html (if elements exist)
-    const getValue = id => document.getElementById(id) ? document.getElementById(id).value.trim() : '';
-    
-    // Parse arrays correctly
-    const parseArray = str => s && s.trim() ? s.split(',').map(item => item.trim()) : [];
-
-    const allergyStr = getValue('allergy');
-    const medsStr = getValue('meds');
-    const conditionsStr = getValue('condition');
+    const getValue = id => {
+        const el = document.getElementById(id);
+        return el ? el.value.trim() : '';
+    };
+    const parseArr = str => str ? str.split(',').map(s => s.trim()).filter(Boolean) : [];
 
     patients[index].name = getValue('name') || patients[index].name;
     patients[index].blood = getValue('blood');
@@ -111,60 +166,122 @@ function saveMedicalDataToLocal() {
     patients[index].weight = getValue('weight');
     patients[index].height = getValue('height');
     patients[index].abha = getValue('abha');
-    
-    patients[index].allergies = allergyStr ? allergyStr.split(',').map(s=>s.trim()) : [];
-    patients[index].meds = medsStr ? medsStr.split(',').map(s=>s.trim()) : [];
-    patients[index].conditions = conditionsStr ? conditionsStr.split(',').map(s=>s.trim()) : [];
+    patients[index].allergies = parseArr(getValue('allergy'));
+    patients[index].meds = parseArr(getValue('meds'));
+    patients[index].conditions = parseArr(getValue('condition'));
     patients[index].surgeries = getValue('surgeries');
-    
     patients[index].ecName = getValue('ecName');
     patients[index].ecRel = getValue('ecRel');
-    patients[index].ecPhone = getValue('ecPhone') || getValue('contact'); // fallback contact
+    patients[index].ecPhone = getValue('ecPhone') || getValue('contact');
     patients[index].doctor = getValue('doctor');
-
-    patients[index].medComplete = true; // Mark as true!
+    patients[index].medComplete = true;
 
     savePatients(patients);
+    return true;
 }
 
-// Existing save to server (kept as requested) but runs local save first
+// ─── 4. SAVE TO SERVER (NON-BLOCKING) ───────────────────────────────────────
 async function saveMedicalDataToServer() {
-    saveMedicalDataToLocal(); // Always update localStorage first
-    
-    // Original server save logic...
+    const loggedInId = sessionStorage.getItem('loggedInUser');
+    if (!loggedInId) return;
+
+    const getValue = id => {
+        const el = document.getElementById(id);
+        return el ? el.value.trim() : '';
+    };
+
+    const payload = {
+        id: loggedInId,
+        name: getValue('name'),
+        blood: getValue('blood'),
+        dob: getValue('dob'),
+        gender: getValue('gender'),
+        weight: getValue('weight'),
+        height: getValue('height'),
+        abha: getValue('abha'),
+        allergy: getValue('allergy'),
+        meds: getValue('meds'),
+        condition: getValue('condition'),
+        surgeries: getValue('surgeries'),
+        ecName: getValue('ecName'),
+        ecRel: getValue('ecRel'),
+        contact: getValue('ecPhone') || getValue('contact'),
+        doctor: getValue('doctor')
+    };
+
     try {
-        const medicalData = {
-            id: sessionStorage.getItem('loggedInUser') || 'unknown',
-            name: document.getElementById('name') ? document.getElementById('name').value : '',
-            // (truncated for brevity, but kept structure)
-        };
-        const response = await fetch('/api/save-medical-data', {
+        await fetch('/api/save-medical-data', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(medicalData)
-        }).catch(e => { /* ignores network error */ });
-    } catch (error) {
-        console.error('Server save failed, but local save succeeded.');
+            body: JSON.stringify(payload)
+        });
+    } catch (e) {
+        // Server save is non-critical; localStorage is source of truth
+        console.warn('[HealthSync] Server save skipped — continuing offline.');
     }
 }
 
+// ─── 5. GENERATE QR (called from sync.html button) ──────────────────────────
 function generateQR() {
+    // Validate required fields
+    const name = document.getElementById('name') ? document.getElementById('name').value.trim() : '';
+    const blood = document.getElementById('blood') ? document.getElementById('blood').value.trim() : '';
+    const ecPhone = document.getElementById('ecPhone') ? document.getElementById('ecPhone').value.trim() : '';
+
+    const errors = [];
+    if (!name) errors.push('Full Name');
+    if (!blood) errors.push('Blood Group');
+    if (!ecPhone) errors.push('Emergency Phone');
+
+    if (errors.length > 0) {
+        showToast(`Please fill: ${errors.join(', ')}`, 'error');
+        return;
+    }
+
+    const btn = document.querySelector('.btn-submit');
+    if (btn) {
+        btn.textContent = 'Saving…';
+        btn.disabled = true;
+    }
+
     saveMedicalDataToLocal();
-    saveMedicalDataToServer();
-    
+    saveMedicalDataToServer(); // fire-and-forget
+
+    showToast('Profile saved! Generating QR…', 'success');
+
     setTimeout(() => {
         window.location.href = 'qr.html';
-    }, 500);
+    }, 900);
 }
 
-// Utility: QR rendering code for qr.html
-function renderQRCodeOnPage(containerId, patientId) {
+// ─── 6. RENDER QR CODE ──────────────────────────────────────────────────────
+async function renderQRCodeOnPage(containerId, patientId) {
     const qrContainer = document.getElementById(containerId);
     if (!qrContainer) return;
-    
+
     qrContainer.innerHTML = '';
-    const url = window.location.origin + '/viewer.html?id=' + encodeURIComponent(patientId);
-    
+    let url = window.location.origin + '/viewer.html?id=' + encodeURIComponent(patientId);
+
+    // Fetch the proper local network IP from the server ONLY if on localhost.
+    // Otherwise, we keep window.location.origin (which works for ngrok!).
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        try {
+            const res = await fetch('/api/generate-qr-url', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: patientId })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success && data.qr_url) {
+                    url = data.qr_url;
+                }
+            }
+        } catch (e) {
+            console.warn('Could not fetch network IP, using window.location.origin instead.');
+        }
+    }
+
     new QRCode(qrContainer, {
         text: url,
         width: 180, height: 180,

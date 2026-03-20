@@ -6,105 +6,125 @@
   <title>Emergency Medical Card — HealthSync</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
-      --bg: #F5EFEB; --surface: #FFFFFF; --surface2: #dce8f0; --surface3: #C8D9E6;
-      --border: #C8D9E6; --accent: #567C8D; --green: #2F4156; --red: #d94f5c;
-      --text: #2F4156; --text2: #567C8D; --text3: #8aabbd;
+      --bg: #06080f; --surface: #0d1117; --surface2: #161b27; --surface3: #1e2535;
+      --border: #232d42; --accent: #00c8ff; --green: #00e5a0; --red: #ff4757; --amber: #ffa94d;
+      --text: #e8edf5; --text2: #8892a4; --text3: #4a5568;
     }
-    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); padding: 40px 20px; }
-    .grid-bg { position: fixed; inset: 0; background-image: linear-gradient(rgba(86,124,141,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(86,124,141,0.06) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+    html, body { min-height: 100%; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); padding: 40px 20px 60px; }
 
-    .viewer-container { max-width: 680px; margin: 0 auto; position: relative; z-index: 1; }
+    .grid-bg { position: fixed; inset: 0; background-image: linear-gradient(rgba(0,200,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,200,255,0.02) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+    .scanline { position: fixed; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--red), transparent); opacity: 0.07; z-index: 1; animation: scanSweep 8s linear infinite; }
+    @keyframes scanSweep { from { top: -2px; } to { top: 100vh; } }
 
-    /* Top Badge */
-    .status-badge { background: rgba(47,65,86,0.08); border: 1px solid rgba(47,65,86,0.2); color: var(--green); text-align: center; padding: 12px; border-radius: 12px; font-family: 'DM Mono', monospace; font-size: 0.85rem; font-weight: 500; text-transform: uppercase; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(47,65,86,0.06); }
+    .viewer-container { max-width: 700px; margin: 0 auto; position: relative; z-index: 1; animation: slideUp 0.5s ease both; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* Header Profile Card */
-    .profile-header { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 32px; display: flex; align-items: center; gap: 24px; margin-bottom: 24px; }
-    .avatar { width: 80px; height: 80px; border-radius: 24px; background: linear-gradient(135deg, var(--accent), var(--green)); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: #FFFFFF; box-shadow: 0 10px 30px rgba(86,124,141,0.25); }
-    .profile-info h1 { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; margin-bottom: 8px; line-height: 1.1; }
-    .profile-info p { color: var(--text2); font-size: 0.95rem; }
-    .profile-info p span { display: inline-block; margin-right: 12px; }
+    /* Top Status Badge */
+    .status-badge { background: rgba(0,229,160,0.08); border: 1px solid rgba(0,229,160,0.25); color: var(--green); text-align: center; padding: 12px 20px; border-radius: 12px; font-family: 'DM Mono', monospace; font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 24px; display: flex; align-items: center; justify-content: center; gap: 10px; animation: scanBadge 2s ease-in-out infinite; }
+    @keyframes scanBadge { 0%,100%{box-shadow:0 0 0 0 rgba(0,229,160,0.15);} 50%{box-shadow:0 0 0 6px rgba(0,229,160,0);} }
 
-    /* Pulsing Allergy Banner */
-    .allergy-banner { display: none; background: rgba(217,79,92,0.08); border: 1px solid rgba(217,79,92,0.35); color: var(--red); padding: 18px 24px; border-radius: 16px; margin-bottom: 24px; animation: pulse 2s infinite ease-in-out; }
-    .allergy-banner h3 { font-family: 'Syne', sans-serif; font-weight: 800; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
-    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(217,79,92,0.3); } 70% { box-shadow: 0 0 0 15px rgba(217,79,92,0); } 100% { box-shadow: 0 0 0 0 rgba(217,79,92,0); } }
+    /* Profile Header Card */
+    .profile-header { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 28px; display: flex; align-items: center; gap: 24px; margin-bottom: 20px; }
+    .avatar { width: 76px; height: 76px; border-radius: 20px; background: linear-gradient(135deg, var(--accent), #a78bfa); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; color: var(--bg); box-shadow: 0 8px 24px rgba(0,200,255,0.25); flex-shrink: 0; }
+    .profile-info h1 { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; margin-bottom: 6px; }
+    .profile-info p { color: var(--text2); font-size: 0.9rem; }
+    .profile-info .pid { margin-top: 6px; font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--text3); }
+
+    /* Blood Type Hero Card */
+    .blood-hero { background: linear-gradient(135deg, rgba(255,71,87,0.15), rgba(255,71,87,0.05)); border: 2px solid rgba(255,71,87,0.3); border-radius: 16px; padding: 20px 28px; margin-bottom: 20px; display: flex; align-items: center; gap: 24px; animation: bloodPulse 2.5s ease-in-out infinite; }
+    @keyframes bloodPulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,71,87,0.15);} 50%{box-shadow:0 0 0 10px rgba(255,71,87,0);} }
+    .blood-type-big { font-family: 'Syne', sans-serif; font-size: 3.5rem; font-weight: 800; color: var(--red); line-height: 1; }
+    .blood-label { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--red); text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; }
+
+    /* Allergy Banner */
+    .allergy-banner { display: none; background: rgba(255,71,87,0.08); border: 1px solid rgba(255,71,87,0.35); color: var(--red); padding: 18px 22px; border-radius: 16px; margin-bottom: 20px; animation: pulse 2s infinite ease-in-out; }
+    .allergy-banner h3 { font-family: 'Syne', sans-serif; font-weight: 800; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; font-size: 1rem; }
+    .allergy-banner .allergy-text { font-family: 'DM Mono', monospace; font-size: 0.85rem; }
+    @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(255,71,87,0.3);} 70%{box-shadow:0 0 0 12px rgba(255,71,87,0);} 100%{box-shadow:0 0 0 0 rgba(255,71,87,0);} }
 
     /* Detail Grid */
-    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-    .detail-item { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+    .detail-item { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; transition: border-color 0.2s; }
+    .detail-item:hover { border-color: rgba(0,200,255,0.2); }
     .detail-item.full { grid-column: 1 / -1; }
-    .detail-label { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--text2); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; }
-    .detail-val { font-size: 1.05rem; font-weight: 500; line-height: 1.5; }
-    .detail-val.critical { color: var(--red); font-weight: 700; font-size: 1.2rem; }
-    .empty { color: var(--text3); font-style: italic; font-size: 0.9rem; }
+    .detail-label { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; }
+    .detail-val { font-size: 0.95rem; font-weight: 500; line-height: 1.6; }
+    .empty { color: var(--text3); font-style: italic; font-size: 0.88rem; }
 
-    /* Highlighted Emergency Block */
-    .emergency-block { background: rgba(217,79,92,0.05); border: 1px dashed rgba(217,79,92,0.25); border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 32px; }
-    .emergency-block .detail-label { color: var(--red); font-weight: 600; font-size: 0.8rem; }
-    .emergency-block .phone { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; margin: 8px 0; color: var(--text); }
-    .emergency-block .rel { color: var(--text2); font-size: 0.9rem; }
+    /* Emergency Contact Block */
+    .emergency-block { background: rgba(255,165,78,0.08); border: 1px solid rgba(255,165,78,0.2); border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 24px; }
+    .ec-label { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--amber); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .ec-phone { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; margin: 8px 0; }
+    .ec-rel { color: var(--text2); font-size: 0.88rem; }
 
-    footer { text-align: center; font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--text3); padding: 20px; }
+    .viewer-footer { text-align: center; font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--text3); padding: 20px 0; }
 
-    /* Add error state style */
-    .error-card { background: var(--surface); border: 1px solid var(--red); border-radius: 16px; padding: 40px; text-align: center; color: var(--red); display: none; margin-top: 60px; }
-    .error-card h2 { font-family: 'Syne', sans-serif; font-size: 1.5rem; margin-bottom: 12px; }
+    .error-card { background: var(--surface); border: 1px solid var(--red); border-radius: 16px; padding: 40px; text-align: center; display: none; }
+    .error-card h2 { font-family: 'Syne', sans-serif; font-size: 1.5rem; color: var(--red); margin-bottom: 12px; }
     .error-card p { color: var(--text2); font-size: 0.9rem; }
 
-    @media (max-width: 600px) { .detail-grid { grid-template-columns: 1fr; } .profile-header { flex-direction: column; text-align: center; gap: 16px; } }
+    @media (max-width: 600px) { .detail-grid { grid-template-columns: 1fr; } .profile-header { flex-direction: column; text-align: center; gap: 14px; } }
   </style>
-
 </head>
 <body>
   <div class="grid-bg"></div>
-  
+  <div class="scanline"></div>
+
   <div class="viewer-container" id="contentView">
-    <div class="status-badge">✅ QR Scanned — Read Only</div>
+    <div class="status-badge">
+      <span>✅</span> QR Scanned — Emergency Read-Only View
+    </div>
 
     <div class="profile-header">
       <div class="avatar" id="vAvatar">--</div>
       <div class="profile-info">
         <h1 id="vName">Loading...</h1>
-        <p>
-          <span id="vAge">-- yrs</span> • 
-          <span id="vGender">--</span>
-        </p>
-        <p style="margin-top:8px; font-family:'DM Mono',monospace; font-size:0.75rem; color:var(--text3);" id="vId">ID: Loading...</p>
+        <p><span id="vAge">-- yrs</span> &nbsp;•&nbsp; <span id="vGender">--</span></p>
+        <div class="pid" id="vId">ID: Loading...</div>
+      </div>
+    </div>
+
+    <div class="blood-hero">
+      <div>
+        <div class="blood-label">Blood Group</div>
+        <div class="blood-type-big" id="vBlood">--</div>
+      </div>
+      <div style="flex:1; border-left:1px solid rgba(255,71,87,0.2); padding-left:24px;">
+        <div class="detail-label">Vitals</div>
+        <div class="detail-val" id="vVitals">-- kg / -- cm</div>
+        <div style="margin-top:8px;" class="detail-label">ABHA ID</div>
+        <div class="detail-val" id="vAbha">--</div>
       </div>
     </div>
 
     <div class="allergy-banner" id="vAllergyBanner">
       <h3>🚨 CRITICAL ALLERGIES</h3>
-      <div id="vAllergyList"></div>
+      <div class="allergy-text" id="vAllergyList"></div>
     </div>
 
     <div class="detail-grid">
-      <div class="detail-item"><div class="detail-label">Blood Group</div><div class="detail-val critical" id="vBlood">--</div></div>
       <div class="detail-item"><div class="detail-label">Date of Birth</div><div class="detail-val" id="vDob">--</div></div>
-      <div class="detail-item"><div class="detail-label">Weight & Height</div><div class="detail-val" id="vVitals">--</div></div>
-      <div class="detail-item"><div class="detail-label">ABHA ID</div><div class="detail-val" id="vAbha">--</div></div>
+      <div class="detail-item"><div class="detail-label">Primary Doctor</div><div class="detail-val" id="vDoctor">--</div></div>
       <div class="detail-item full"><div class="detail-label">Current Medications</div><div class="detail-val" id="vMeds">None recorded</div></div>
       <div class="detail-item full"><div class="detail-label">Medical Conditions</div><div class="detail-val" id="vConds">None recorded</div></div>
       <div class="detail-item full"><div class="detail-label">Past Surgeries</div><div class="detail-val" id="vSurg">None recorded</div></div>
     </div>
 
     <div class="emergency-block">
-      <div class="detail-label">EMERGENCY CONTACT</div>
-      <div class="phone" id="vPhone">--</div>
-      <div class="rel" id="vRel">--</div>
+      <div class="ec-label">⚡ Emergency Contact</div>
+      <div class="ec-phone" id="vPhone">--</div>
+      <div class="ec-rel" id="vRel">--</div>
     </div>
 
-    <footer>
-      DATA PROVIDED BY PATIENT · HEALTHSYNC INDIA · FOR EMERGENCY USE ONLY
-    </footer>
+    <div class="viewer-footer">DATA PROVIDED BY PATIENT · HEALTHSYNC INDIA · FOR EMERGENCY USE ONLY</div>
   </div>
 
   <div class="viewer-container error-card" id="errorView">
     <h2>Record Not Found</h2>
-    <p>The scanned QR code points to a patient record that does not exist or has been deleted from this device.</p>
+    <p>The scanned QR code points to a patient record that does not exist or has been removed.</p>
   </div>
 
   <script src="script.js"></script>
@@ -112,16 +132,13 @@
     window.addEventListener('DOMContentLoaded', async () => {
       const id = new URLSearchParams(window.location.search).get('id');
       if (!id) { showError(); return; }
-
       let patient = null;
 
-      // ── Step 1: Try localStorage first (vital for rich accurate previews on the user's own device) ──
       if (typeof getPatients === 'function') {
         const patients = getPatients();
         patient = patients.find(p => p.id === id) || null;
       }
 
-      // ── Step 2: Fall back to server API (for actual first responders scanning on a different device) ──
       if (!patient) {
         try {
           const res = await fetch(`/api/get-medical-data/${encodeURIComponent(id)}`);
@@ -129,31 +146,21 @@
             const data = await res.json();
             if (data.success) {
               patient = {
-                id:        data.id,
-                name:      data.name,
-                blood:     data.blood,
-                allergies: data.allergy  ? data.allergy.split(',').map(s => s.trim()).filter(Boolean)  : [],
-                conditions:data.condition? data.condition.split(',').map(s => s.trim()).filter(Boolean) : [],
-                meds:      data.meds     ? data.meds.split(',').map(s => s.trim()).filter(Boolean)     : [],
-                surgeries: data.surgeries || '',
-                ecPhone:   data.contact,
-                ecName:    data.ecName    || '',
-                ecRel:     data.ecRel     || '',
-                dob:       data.dob       || '',
-                gender:    data.gender    || '',
-                weight:    data.weight    || '',
-                height:    data.height    || '',
-                abha:      data.abha      || ''
+                id: data.id, name: data.name, blood: data.blood,
+                allergies: data.allergy   ? data.allergy.split(',').map(s=>s.trim()).filter(Boolean)   : [],
+                conditions:data.condition ? data.condition.split(',').map(s=>s.trim()).filter(Boolean) : [],
+                meds:      data.meds      ? data.meds.split(',').map(s=>s.trim()).filter(Boolean)      : [],
+                surgeries: data.surgeries || '', ecPhone: data.contact, ecName: data.ecName || '',
+                ecRel: data.ecRel || '', dob: data.dob || '', gender: data.gender || '',
+                weight: data.weight || '', height: data.height || '', abha: data.abha || '',
+                doctor: data.doctor || ''
               };
             }
           }
-        } catch (e) {
-          console.warn('[Viewer] Server fetch failed.', e);
-        }
+        } catch(e) { console.warn('[Viewer] Server fetch failed.', e); }
       }
 
       if (!patient) { showError(); return; }
-
       renderPatient(patient);
     });
 
@@ -162,51 +169,34 @@
       document.getElementById('errorView').style.display = 'block';
     }
 
-    function renderPatient(patient) {
-      // Avatar
-      const nm = patient.name || 'Unknown';
+    function renderPatient(p) {
+      const nm = p.name || 'Unknown';
       document.getElementById('vAvatar').textContent = nm.substring(0, 2).toUpperCase();
       document.getElementById('vName').textContent = nm;
-      document.getElementById('vId').textContent = 'ID: ' + patient.id;
+      document.getElementById('vId').textContent = 'ID: ' + p.id;
+      document.getElementById('vGender').textContent = p.gender || 'Not specified';
+      if (p.dob) { const d = new Date(p.dob); const a = new Date(Date.now()-d.getTime()); document.getElementById('vAge').textContent = Math.abs(a.getUTCFullYear() - 1970) + ' yrs'; }
+      else { document.getElementById('vAge').textContent = 'Age N/A'; }
 
-      // Age & Gender
-      document.getElementById('vGender').textContent = patient.gender || 'Not specified';
-      if (patient.dob) {
-        const dobDate = new Date(patient.dob);
-        const ageDT = new Date(Date.now() - dobDate.getTime());
-        document.getElementById('vAge').textContent = Math.abs(ageDT.getUTCFullYear() - 1970) + ' yrs';
-      } else {
-        document.getElementById('vAge').textContent = 'Age N/A';
-      }
+      document.getElementById('vBlood').textContent = p.blood || '?';
+      document.getElementById('vVitals').textContent = `${p.weight ? p.weight+' kg' : '--'} / ${p.height ? p.height+' cm' : '--'}`;
+      document.getElementById('vDob').textContent = p.dob || 'Unknown';
+      document.getElementById('vDoctor').textContent = p.doctor || 'None recorded';
 
-      // Allergy Banner
-      if (patient.allergies && patient.allergies.length > 0) {
-        document.getElementById('vAllergyBanner').style.display = 'block';
-        document.getElementById('vAllergyList').textContent = patient.allergies.join(', ');
-      }
-
-      const sVal = (elId, str) => {
-        const el = document.getElementById(elId);
-        if (!str || str.length === 0) { el.innerHTML = '<span class="empty">None recorded</span>'; }
-        else { el.textContent = Array.isArray(str) ? str.join(', ') : str; }
+      const sVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (!val || (Array.isArray(val) && val.length===0) || val === '') { el.innerHTML = '<span class="empty">None recorded</span>'; }
+        else { el.textContent = Array.isArray(val) ? val.join(', ') : val; }
       };
+      sVal('vAbha', p.abha); sVal('vMeds', p.meds); sVal('vConds', p.conditions); sVal('vSurg', p.surgeries);
 
-      document.getElementById('vBlood').textContent = patient.blood || 'Unknown';
-      document.getElementById('vDob').textContent = patient.dob || 'Unknown';
-      const w = patient.weight ? patient.weight + ' kg' : '--';
-      const h = patient.height ? patient.height + ' cm' : '--';
-      document.getElementById('vVitals').textContent = `${w} / ${h}`;
+      if (p.allergies && p.allergies.length > 0) {
+        document.getElementById('vAllergyBanner').style.display = 'block';
+        document.getElementById('vAllergyList').textContent = p.allergies.join(', ');
+      }
 
-      sVal('vAbha', patient.abha);
-      sVal('vMeds', patient.meds);
-      sVal('vConds', patient.conditions);
-      sVal('vSurg', patient.surgeries);
-
-      // Emergency Contact
-      document.getElementById('vPhone').textContent = patient.ecPhone || patient.phone || 'No phone provided';
-      const ecN = patient.ecName || 'N/A';
-      const ecR = patient.ecRel || 'N/A';
-      document.getElementById('vRel').textContent = `${ecN} (${ecR})`;
+      document.getElementById('vPhone').textContent = p.ecPhone || p.phone || 'No phone provided';
+      document.getElementById('vRel').textContent = `${p.ecName || 'N/A'} (${p.ecRel || 'N/A'})`;
     }
   </script>
 </body>

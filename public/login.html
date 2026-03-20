@@ -1,97 +1,634 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HealthSync — Secure Portal</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    :root {
-      --bg: #F5EFEB; --surface: #FFFFFF; --surface2: #dce8f0; --surface3: #C8D9E6;
-      --border: #C8D9E6; --accent: #567C8D; --accent-dim: rgba(86,124,141,0.12);
-      --green: #2F4156; --red: #d94f5c; --text: #2F4156; --text2: #567C8D; --text3: #8aabbd;
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;}
-    .grid-bg { position: fixed; inset: 0; background-image: linear-gradient(rgba(86,124,141,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(86,124,141,0.06) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
 
-    .nav-logo { position: absolute; top: 24px; left: 32px; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.5rem; text-decoration: none; color: var(--text); z-index: 10;}
-    .nav-logo span { color: var(--accent); }
+    :root {
+      --bg: #06080f;
+      --surface: #0d1117;
+      --surface2: #161b27;
+      --surface3: #1e2535;
+      --border: #232d42;
+      --accent: #00c8ff;
+      --accent-dim: rgba(0, 200, 255, 0.12);
+      --green: #00e5a0;
+      --red: #ff4757;
+      --text: #e8edf5;
+      --text2: #8892a4;
+      --text3: #4a5568;
+    }
 
-    .back-btn { position: absolute; top: 24px; right: 32px; z-index: 10; display: flex; align-items: center; gap: 8px; padding: 8px 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text2); font-family: 'DM Mono', monospace; font-size: 0.78rem; text-decoration: none; transition: all 0.2s; }
-    .back-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+    html,
+    body {
+      height: 100%;
+    }
 
-    .auth-container { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; width: 100%; max-width: 440px; padding: 40px; position: relative; z-index: 1; box-shadow: 0 8px 32px rgba(47,65,86,0.1); }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow: hidden;
+      position: relative;
+    }
 
-    .form-header { margin-bottom: 28px; text-align: center; }
-    .form-header h2 { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; }
-    .form-header p { font-size: 0.85rem; color: var(--text2); }
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      background-image: linear-gradient(rgba(0, 200, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 200, 255, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+      animation: gridDrift 20s linear infinite;
+    }
 
-    .role-badge { display: inline-block; font-family: 'DM Mono', monospace; font-size: 0.7rem; padding: 4px 10px; border-radius: 6px; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; }
-    .badge-hospital { background: rgba(47,65,86,0.1); color: var(--green); border: 1px solid rgba(47,65,86,0.2); }
-    .badge-patient { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(86,124,141,0.2); }
+    @keyframes gridDrift {
+      from {
+        background-position: 0 0;
+      }
 
-    .tabs { display: flex; gap: 8px; margin-bottom: 24px; padding: 4px; background: var(--surface2); border-radius: 12px; }
-    .tab { flex: 1; padding: 10px; text-align: center; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 8px; transition: all 0.2s; color: var(--text2); }
-    .tab.active { background: var(--surface); color: var(--text); box-shadow: 0 2px 8px rgba(47,65,86,0.1); }
+      to {
+        background-position: 40px 40px;
+      }
+    }
 
-    .form-group { margin-bottom: 18px; }
-    label { display: block; font-size: 0.75rem; font-family: 'DM Mono', monospace; text-transform: uppercase; color: var(--text2); margin-bottom: 8px; }
-    input { width: 100%; padding: 14px 16px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; transition: all 0.2s; outline: none; }
-    input:focus { border-color: var(--accent); background: var(--surface3); box-shadow: 0 0 0 3px rgba(86,124,141,0.12); }
+    .scanline {
+      position: fixed;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0.08;
+      z-index: 1;
+      animation: scanSweep 8s linear infinite;
+    }
 
-    .btn-submit { width: 100%; padding: 14px; background: var(--accent); color: #FFFFFF; border: none; border-radius: 10px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.2s; margin-top: 10px; }
-    .btn-submit:hover { background: #2F4156; transform: translateY(-2px); box-shadow: 0 10px 25px rgba(47,65,86,0.2); }
+    @keyframes scanSweep {
+      from {
+        top: -2px;
+      }
 
-    .error-msg { color: var(--red); font-size: 0.75rem; min-height: 16px; margin-top: 6px; font-family: 'DM Mono', monospace; }
+      to {
+        top: 100vh;
+      }
+    }
 
-    .toggle-pw { position: absolute; right: 12px; bottom: 12px; background: none; border: none; font-size: 1.1rem; cursor: pointer; color: var(--text3); padding: 0; outline: none; }
-    .toggle-pw:hover { color: var(--text); }
-    .pw-wrap { position: relative; }
+    /* ── Nav ── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 40px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(6, 8, 15, 0.85);
+      backdrop-filter: blur(20px);
+      z-index: 100;
+    }
+
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.3rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .nav-logo span {
+      color: var(--accent);
+    }
+
+    .nav-back {
+      font-size: 0.82rem;
+      color: var(--text2);
+      text-decoration: none;
+      font-family: 'DM Mono', monospace;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 14px;
+      transition: all 0.2s;
+    }
+
+    .nav-back:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── Card ── */
+    .page-center {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 860px;
+      padding: 24px;
+      animation: wrapIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    @keyframes wrapIn {
+      from {
+        opacity: 0;
+        transform: translateY(32px) scale(0.97);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .card-ring {
+      padding: 1.5px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, var(--accent), #a78bfa, #ff6b35, var(--accent));
+      background-size: 300% 300%;
+      animation: ringShift 6s ease infinite;
+      box-shadow: 0 0 60px rgba(0, 200, 255, 0.07), 0 40px 80px rgba(0, 0, 0, 0.6);
+    }
+
+    @keyframes ringShift {
+
+      0%,
+      100% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+    }
+
+    .card {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      border-radius: 21px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    /* ── Left Brand Panel ── */
+    .brand-panel {
+      background: linear-gradient(160deg, #0a1929 0%, #050c16 60%, #0d0522 100%);
+      padding: 52px 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      border-right: 1px solid var(--border);
+    }
+
+    .brand-panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(rgba(0, 200, 255, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 200, 255, 0.04) 1px, transparent 1px);
+      background-size: 36px 36px;
+      animation: gridDrift 20s linear infinite;
+    }
+
+    .brand-glow {
+      position: absolute;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 200, 255, 0.1) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 0;
+      animation: glowPulse 4s ease-in-out infinite;
+    }
+
+    @keyframes glowPulse {
+
+      0%,
+      100% {
+        opacity: 0.6;
+        transform: translate(-50%, -50%) scale(1);
+      }
+
+      50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.15);
+      }
+    }
+
+    .brand-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .logo-badge {
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #0d2b40, #1a0d3d);
+      border: 1.5px solid rgba(0, 200, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin: 0 auto 20px;
+      box-shadow: 0 0 40px rgba(0, 200, 255, 0.2);
+    }
+
+    .brand-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    .brand-sub {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--text3);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 32px;
+    }
+
+    .feature-items {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 200px;
+      text-align: left;
+    }
+
+    .feat-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text2);
+    }
+
+    .feat-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      flex-shrink: 0;
+    }
+
+    /* ── Right Form Panel ── */
+    .form-panel {
+      padding: 48px 44px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: var(--surface);
+    }
+
+    .form-header {
+      margin-bottom: 28px;
+    }
+
+    .form-header h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.7rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .form-header p {
+      font-size: 0.86rem;
+      color: var(--text2);
+    }
+
+    .role-badge {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      padding: 4px 12px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .badge-hospital {
+      background: rgba(255, 165, 78, 0.1);
+      color: #ffa94d;
+      border: 1px solid rgba(255, 165, 78, 0.25);
+    }
+
+    .badge-patient {
+      background: var(--accent-dim);
+      color: var(--accent);
+      border: 1px solid rgba(0, 200, 255, 0.25);
+    }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 24px;
+      padding: 4px;
+      background: var(--surface2);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.22s;
+      color: var(--text2);
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .tab.active {
+      background: var(--surface3);
+      color: var(--text);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+    }
+
+    .tab:hover:not(.active) {
+      color: var(--accent);
+    }
+
+    /* ── Form ── */
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.7rem;
+      font-family: 'DM Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.9rem;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px 16px 13px 42px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      transition: all 0.22s;
+      outline: none;
+      caret-color: var(--accent);
+    }
+
+    input::placeholder {
+      color: var(--text3);
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      background: var(--surface3);
+      box-shadow: 0 0 0 3px rgba(0, 200, 255, 0.08);
+    }
+
+    .toggle-pw {
+      position: absolute;
+      right: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      opacity: 0.4;
+      color: var(--text);
+      transition: opacity 0.2s;
+      padding: 4px;
+    }
+
+    .toggle-pw:hover {
+      opacity: 0.85;
+    }
+
+    /* ── Submit ── */
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      border-radius: 11px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.22s;
+      margin-top: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-submit::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn-submit:hover::after {
+      left: 150%;
+    }
+
+    .btn-submit:hover {
+      background: #33d4ff;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(0, 200, 255, 0.3);
+    }
+
+    .error-msg {
+      color: var(--red);
+      font-size: 0.75rem;
+      min-height: 16px;
+      margin-top: 6px;
+      font-family: 'DM Mono', monospace;
+    }
+
+    #globalError {
+      background: rgba(255, 71, 87, 0.08);
+      border: 1px solid rgba(255, 71, 87, 0.25);
+      color: #ff6b87;
+      border-radius: 9px;
+      padding: 10px 14px;
+      font-size: 0.77rem;
+      font-family: 'DM Mono', monospace;
+      margin-bottom: 14px;
+      display: none;
+      animation: shake 0.35s ease;
+    }
+
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      25% {
+        transform: translateX(-5px);
+      }
+
+      75% {
+        transform: translateX(5px);
+      }
+    }
+
+    @media (max-width: 700px) {
+      .card {
+        grid-template-columns: 1fr;
+      }
+
+      .brand-panel {
+        padding: 28px 24px;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .form-panel {
+        padding: 32px 24px;
+      }
+
+      nav {
+        padding: 14px 20px;
+      }
+    }
   </style>
-
 </head>
+
 <body>
   <div class="grid-bg"></div>
-  <a href="landing.html" class="nav-logo">Health<span>Sync</span></a>
-  <a href="landing.html" class="back-btn">← Back to Home</a>
+  <div class="scanline"></div>
 
-  <div class="auth-container">
-    <div class="form-header">
-      <div id="roleBadge" class="role-badge"></div>
-      <h2 id="formTitle">Sign In</h2>
-      <p id="formSub">Access your secure portal</p>
+  <nav>
+    <a href="landing.html" class="nav-logo">Health<span>Sync</span></a>
+    <a href="landing.html" class="nav-back">← Back to Home</a>
+  </nav>
+
+  <div class="page-center">
+    <div class="card-ring">
+      <div class="card">
+
+        <div class="brand-panel">
+          <div class="brand-glow"></div>
+          <div class="brand-content">
+            <div class="logo-badge">🏥</div>
+            <div class="brand-title">HealthSync<br>Portal Access</div>
+            <div class="brand-sub">Emergency QR System</div>
+            <div class="feature-items">
+              <div class="feat-row">
+                <div class="feat-dot"></div>Instant QR-based access
+              </div>
+              <div class="feat-row">
+                <div class="feat-dot" style="background:var(--green);box-shadow:0 0 8px var(--green);"></div>Encrypted
+                medical data
+              </div>
+              <div class="feat-row">
+                <div class="feat-dot" style="background:#ffa94d;box-shadow:0 0 8px #ffa94d;"></div>Hospital + Patient
+                portals
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-panel">
+          <div class="form-header">
+            <div id="roleBadge" class="role-badge"></div>
+            <h2 id="formTitle">Sign In</h2>
+            <p id="formSub">Access your secure portal</p>
+          </div>
+
+          <div class="tabs" id="authTabs" style="display:none;">
+            <div class="tab active" id="tabLogin" onclick="switchTab('login')">Sign In</div>
+            <div class="tab" id="tabRegister" onclick="switchTab('register')">Create Account</div>
+          </div>
+
+          <form id="authForm">
+            <div id="globalError"></div>
+            <div id="fieldsLogin"></div>
+            <div id="fieldsRegister" style="display:none;"></div>
+            <div class="error-msg" id="errorMsg"></div>
+            <button type="submit" class="btn-submit" id="submitBtn">Sign In →</button>
+          </form>
+        </div>
+
+      </div>
     </div>
-
-    <!-- For patients: Toggle between Login and Register -->
-    <div class="tabs" id="authTabs" style="display: none;">
-      <div class="tab active" id="tabLogin" onclick="switchTab('login')">Sign In</div>
-      <div class="tab" id="tabRegister" onclick="switchTab('register')">Create Account</div>
-    </div>
-
-    <form id="authForm">
-      <div id="fieldsLogin"></div>
-      <div id="fieldsRegister" style="display: none;"></div>
-      <div class="error-msg" id="globalError"></div>
-      <button type="submit" class="btn-submit" id="submitBtn">Sign In →</button>
-    </form>
   </div>
 
   <script src="script.js"></script>
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const role = urlParams.get('role') || 'patient';
-    let currentMode = 'login'; 
+    let currentMode = 'login';
 
-    const USERS = {
-      'admin001': 'admin@123',
-      'medic01': 'medic@01',
-      'demo': 'demo12'
-    };
+    // ✅ FIX: Hardcoded credentials removed. Hospital login now calls /api/login.
 
-    window.addEventListener('DOMContentLoaded', () => {
-      setupUI();
-    });
+    window.addEventListener('DOMContentLoaded', () => { setupUI(); });
 
     function setupUI() {
       const badge = document.getElementById('roleBadge');
@@ -99,131 +636,92 @@
         badge.textContent = '🏥 Hospital Access';
         badge.className = 'role-badge badge-hospital';
         document.getElementById('formTitle').textContent = 'Hospital Portal';
-        
         document.getElementById('fieldsLogin').innerHTML = `
-          <div class="form-group">
-            <label>Admin ID</label>
-            <input type="text" id="hospId" required>
-          </div>
-          <div class="form-group">
-            <label>Password</label>
-            <div class="pw-wrap">
-              <input type="password" id="hospPw" required style="padding-right: 40px;">
-              <button type="button" class="toggle-pw" onclick="togglePwVisibility('hospPw', this)" aria-label="Toggle password">👁️</button>
-            </div>
-          </div>`;
+          <div class="form-group"><label>Admin ID</label><div class="input-wrap"><span class="input-icon">🪪</span><input type="text" id="hospId" required placeholder="Enter admin ID"></div></div>
+          <div class="form-group"><label>Password</label><div class="input-wrap"><span class="input-icon">🔒</span><input type="password" id="hospPw" required style="padding-right:40px;" placeholder="Enter password"><button type="button" class="toggle-pw" onclick="togglePw('hospPw',this)">👁️</button></div></div>`;
       } else {
         badge.textContent = '🪪 Patient Access';
         badge.className = 'role-badge badge-patient';
         document.getElementById('authTabs').style.display = 'flex';
-        
         document.getElementById('fieldsLogin').innerHTML = `
-          <div class="form-group"><label>Email</label><input type="email" id="patLoginEmail" required></div>
-          <div class="form-group">
-            <label>Password</label>
-            <div class="pw-wrap">
-              <input type="password" id="patLoginPw" required style="padding-right: 40px;">
-              <button type="button" class="toggle-pw" onclick="togglePwVisibility('patLoginPw', this)" aria-label="Toggle password">👁️</button>
-            </div>
-          </div>`;
-          
+          <div class="form-group"><label>Email</label><div class="input-wrap"><span class="input-icon">📧</span><input type="email" id="patLoginEmail" required placeholder="you@example.com"></div></div>
+          <div class="form-group"><label>Password</label><div class="input-wrap"><span class="input-icon">🔒</span><input type="password" id="patLoginPw" required style="padding-right:40px;" placeholder="Your password"><button type="button" class="toggle-pw" onclick="togglePw('patLoginPw',this)">👁️</button></div></div>`;
         document.getElementById('fieldsRegister').innerHTML = `
-          <div class="form-group"><label>Full Name</label><input type="text" id="regName"></div>
-          <div class="form-group"><label>Email</label><input type="email" id="regEmail"></div>
-          <div class="form-group"><label>Phone</label><input type="tel" id="regPhone"></div>
-          <div class="form-group">
-            <label>Password</label>
-            <div class="pw-wrap">
-              <input type="password" id="regPw" style="padding-right: 40px;">
-              <button type="button" class="toggle-pw" onclick="togglePwVisibility('regPw', this)" aria-label="Toggle password">👁️</button>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Confirm Password</label>
-            <div class="pw-wrap">
-              <input type="password" id="regConfirmPw" style="padding-right: 40px;">
-              <button type="button" class="toggle-pw" onclick="togglePwVisibility('regConfirmPw', this)" aria-label="Toggle password">👁️</button>
-            </div>
-          </div>`;
+          <div class="form-group"><label>Full Name</label><div class="input-wrap"><span class="input-icon">👤</span><input type="text" id="regName" placeholder="Your full name"></div></div>
+          <div class="form-group"><label>Email</label><div class="input-wrap"><span class="input-icon">📧</span><input type="email" id="regEmail" placeholder="you@example.com"></div></div>
+          <div class="form-group"><label>Phone</label><div class="input-wrap"><span class="input-icon">📱</span><input type="tel" id="regPhone" placeholder="+91..."></div></div>
+          <div class="form-group"><label>Password</label><div class="input-wrap"><span class="input-icon">🔒</span><input type="password" id="regPw" style="padding-right:40px;" placeholder="Min 6 characters"><button type="button" class="toggle-pw" onclick="togglePw('regPw',this)">👁️</button></div></div>
+          <div class="form-group"><label>Confirm Password</label><div class="input-wrap"><span class="input-icon">🔐</span><input type="password" id="regConfirmPw" style="padding-right:40px;" placeholder="Repeat password"><button type="button" class="toggle-pw" onclick="togglePw('regConfirmPw',this)">👁️</button></div></div>`;
       }
     }
 
     function switchTab(mode) {
       currentMode = mode;
-      document.getElementById('globalError').textContent = '';
+      document.getElementById('globalError').style.display = 'none';
       if (mode === 'login') {
         document.getElementById('tabLogin').classList.add('active');
         document.getElementById('tabRegister').classList.remove('active');
         document.getElementById('fieldsLogin').style.display = 'block';
         document.getElementById('fieldsRegister').style.display = 'none';
         document.getElementById('submitBtn').textContent = 'Sign In →';
-        
-        // required toggles
         document.getElementById('patLoginEmail').required = true;
         document.getElementById('patLoginPw').required = true;
-        ['regName','regEmail','regPhone','regPw','regConfirmPw'].forEach(id => document.getElementById(id).required = false);
+        ['regName', 'regEmail', 'regPhone', 'regPw', 'regConfirmPw'].forEach(id => { const el = document.getElementById(id); if (el) el.required = false; });
       } else {
         document.getElementById('tabRegister').classList.add('active');
         document.getElementById('tabLogin').classList.remove('active');
         document.getElementById('fieldsRegister').style.display = 'block';
         document.getElementById('fieldsLogin').style.display = 'none';
         document.getElementById('submitBtn').textContent = 'Create Account →';
-
         document.getElementById('patLoginEmail').required = false;
         document.getElementById('patLoginPw').required = false;
-        ['regName','regEmail','regPhone','regPw','regConfirmPw'].forEach(id => document.getElementById(id).required = true);
+        ['regName', 'regEmail', 'regPhone', 'regPw', 'regConfirmPw'].forEach(id => { const el = document.getElementById(id); if (el) el.required = true; });
       }
     }
 
     document.getElementById('authForm').addEventListener('submit', (e) => {
       e.preventDefault();
-      document.getElementById('globalError').textContent = '';
-
+      const errEl = document.getElementById('globalError');
+      errEl.style.display = 'none';
       if (role === 'hospital') {
         const id = document.getElementById('hospId').value.trim();
         const pw = document.getElementById('hospPw').value;
-        if (USERS[id] && USERS[id] === pw) {
-          window.location.href = 'dashboard.html';
-        } else {
-          document.getElementById('globalError').textContent = 'Invalid ID or Password.';
-        }
+        // ✅ FIX: Verify credentials via server API instead of hardcoded object
+        (async () => {
+          try {
+            const res = await fetch('/api/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ user_id: id, password: pw })
+            });
+            const data = await res.json();
+            if (data.success) { window.location.href = 'dashboard.html'; }
+            else { errEl.textContent = '// ERR: Invalid ID or Password.'; errEl.style.display = 'block'; }
+          } catch (e) {
+            errEl.textContent = '// ERR: Could not connect to server.';
+            errEl.style.display = 'block';
+          }
+        })();
+        return;
       } else {
         if (currentMode === 'login') {
-          userLogin(
-            document.getElementById('patLoginEmail').value.trim(),
-            document.getElementById('patLoginPw').value
-          );
+          userLogin(document.getElementById('patLoginEmail').value.trim(), document.getElementById('patLoginPw').value);
         } else {
           const pw1 = document.getElementById('regPw').value;
           const pw2 = document.getElementById('regConfirmPw').value;
-          if (pw1 !== pw2) {
-             document.getElementById('globalError').textContent = 'Passwords do not match.';
-             return;
-          }
-          if (pw1.length < 6) {
-             document.getElementById('globalError').textContent = 'Password must be at least 6 characters.';
-             return;
-          }
-          registerUser(
-            document.getElementById('regName').value.trim(),
-            document.getElementById('regEmail').value.trim(),
-            document.getElementById('regPhone').value.trim(),
-            pw1
-          );
+          if (pw1 !== pw2) { errEl.textContent = '// ERR: Passwords do not match.'; errEl.style.display = 'block'; return; }
+          if (pw1.length < 6) { errEl.textContent = '// ERR: Password must be at least 6 characters.'; errEl.style.display = 'block'; return; }
+          registerUser(document.getElementById('regName').value.trim(), document.getElementById('regEmail').value.trim(), document.getElementById('regPhone').value.trim(), pw1);
         }
       }
     });
 
-    function togglePwVisibility(id, btn) {
+    function togglePw(id, btn) {
       const input = document.getElementById(id);
-      if (input.type === 'password') {
-        input.type = 'text';
-        btn.textContent = '🙈';
-      } else {
-        input.type = 'password';
-        btn.textContent = '👁️';
-      }
+      if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
+      else { input.type = 'password'; btn.textContent = '👁️'; }
     }
   </script>
 </body>
+
 </html>

@@ -20,18 +20,18 @@
     }
 
     :root {
-      --bg: #0d1a2e;
-      --surface: rgba(255, 255, 255, 0.08);
-      --surface2: rgba(200, 217, 230, 0.12);
-      --surface3: rgba(200, 217, 230, 0.18);
-      --border: rgba(200, 217, 230, 0.2);
-      --accent: #7eb8d4;
-      --accent-dim: rgba(126, 184, 212, 0.15);
-      --green: #a8e6cf;
-      --green-dim: rgba(168, 230, 207, 0.1);
-      --text: #e8f0f5;
-      --text2: #9fbfce;
-      --text3: #5a8a9e;
+      --bg: #06080f;
+      --surface: #0d1117;
+      --surface2: #161b27;
+      --surface3: #1e2535;
+      --border: #232d42;
+      --accent: #00c8ff;
+      --accent-dim: rgba(0,200,255,0.12);
+      --green: #00e5a0;
+      --green-dim: rgba(0,229,160,0.1);
+      --text: #e8edf5;
+      --text2: #8892a4;
+      --text3: #4a5568;
     }
 
     html,
@@ -64,7 +64,7 @@
       align-items: center;
       justify-content: space-between;
       padding: 18px 48px;
-      background: rgba(13, 26, 46, 0.7);
+      background: rgba(6, 8, 15, 0.7);
       backdrop-filter: blur(20px);
       border-bottom: 1px solid rgba(126, 184, 212, 0.15);
       z-index: 200;
@@ -110,7 +110,7 @@
 
     .nav-btn.primary {
       background: var(--accent);
-      color: #0d1a2e;
+      color: var(--bg);
       border: none;
       font-weight: 700;
     }
@@ -133,12 +133,98 @@
       z-index: 10;
     }
 
+    .sos-modal-overlay {
+      position: fixed; inset: 0; background: rgba(6, 8, 15, 0.8); backdrop-filter: blur(8px);
+      z-index: 1000; display: none; align-items: center; justify-content: center;
+    }
+    .sos-modal-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
+    .sos-modal {
+      background: var(--bg); border: 2px solid rgba(220, 38, 38, 0.4); border-radius: 20px;
+      width: 100%; max-width: 400px; padding: 32px; text-align: center; color: var(--text);
+      box-shadow: 0 20px 60px rgba(220, 38, 38, 0.2);
+    }
+    .sos-modal h2 { font-family: 'Syne', sans-serif; font-size: 1.8rem; color: #fca5a5; margin-bottom: 24px; }
+    .sos-grid { display: grid; gap: 16px; margin-bottom: 24px; }
+    .sos-action-btn {
+      padding: 16px; border: 1px solid var(--border); border-radius: 12px; background: rgba(255,255,255,0.05);
+      color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: 0.2s;
+      text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 12px;
+    }
+    .sos-action-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--accent); }
+    .sos-action-btn.red { background: rgba(220, 38, 38, 0.15); border-color: rgba(220, 38, 38, 0.4); color: #fca5a5; }
+    .sos-action-btn.red:hover { background: #dc2626; color: #fff; border-color: #dc2626; }
+    
+    .sos-gps-box { background: rgba(0,0,0,0.3); padding: 16px; border-radius: 12px; font-family: 'DM Mono', monospace; font-size: 0.85rem; color: var(--text2); display: none; margin-bottom: 24px; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .hero-sos-btn {
+      margin-top: 32px;
+      padding: 16px 42px;
+      background: linear-gradient(135deg, #ff4757, #ff6b81, #d94f5c);
+      background-size: 200% 200%;
+      color: #ffffff;
+      border: 2px solid rgba(255, 107, 129, 0.6);
+      border-radius: 100px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-size: 1.15rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 900;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      box-shadow: 0 10px 30px rgba(255, 71, 87, 0.5), inset 0 2px 4px rgba(255,255,255,0.4);
+      animation: sosGradient 3s ease infinite, sosPulseHero 2s infinite, cardsIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      overflow: hidden;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .hero-sos-btn::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -150%;
+      width: 50%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      transform: skewX(-20deg);
+      animation: sosShine 3s infinite;
+    }
+
+    @keyframes sosGradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes sosShine {
+      0% { left: -150%; }
+      20% { left: 200%; }
+      100% { left: 200%; }
+    }
+
+    .hero-sos-btn:hover {
+      transform: translateY(-6px) scale(1.05);
+      box-shadow: 0 16px 48px rgba(255, 71, 87, 0.7), inset 0 2px 4px rgba(255,255,255,0.6);
+      border-color: rgba(255, 255, 255, 0.8);
+      animation: none;
+    }
+
+    @keyframes sosPulseHero {
+      0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.6), inset 0 2px 4px rgba(255,255,255,0.4); }
+      70% { box-shadow: 0 0 0 24px rgba(255, 71, 87, 0), inset 0 2px 4px rgba(255,255,255,0.4); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0), inset 0 2px 4px rgba(255,255,255,0.4); }
+    }
+
     /* Subtle dark vignette so text reads over scene */
     .hero::before {
       content: '';
       position: fixed;
       inset: 0;
-      background: radial-gradient(ellipse 80% 65% at 50% 38%, rgba(13, 26, 46, 0.20) 0%, rgba(13, 26, 46, 0.75) 100%);
+      background: radial-gradient(ellipse 80% 65% at 50% 38%, rgba(6, 8, 15, 0.20) 0%, rgba(6, 8, 15, 0.75) 100%);
       pointer-events: none;
       z-index: -1;
     }
@@ -236,7 +322,7 @@
 
     .portal-card {
       position: relative;
-      background: rgba(13, 26, 46, 0.5);
+      background: rgba(6, 8, 15, 0.5);
       backdrop-filter: blur(14px);
       border: 1px solid rgba(126, 184, 212, 0.22);
       border-radius: 20px;
@@ -266,7 +352,7 @@
     .portal-card:hover {
       transform: translateY(-6px);
       border-color: rgba(126, 184, 212, 0.45);
-      box-shadow: 0 16px 40px rgba(13, 26, 46, 0.5);
+      box-shadow: 0 16px 40px rgba(0, 200, 255, 0.15);
     }
 
     .portal-card:hover::before {
@@ -339,7 +425,7 @@
 
     /* ─── FEATURE STRIP ─── */
     .feature-strip {
-      background: rgba(13, 26, 46, 0.75);
+      background: rgba(6, 8, 15, 0.75);
       backdrop-filter: blur(12px);
       border-top: 1px solid rgba(126, 184, 212, 0.15);
       padding: 24px 48px;
@@ -927,7 +1013,133 @@
       </a>
 
     </div>
+    
+    <button class="hero-sos-btn" onclick="openSOS()">🚨 SOS (EMERGENCY)</button>
   </section>
+
+  <!-- SOS Modal -->
+  <div class="sos-modal-overlay" id="sosModal">
+    <div class="sos-modal">
+      <h2>EMERGENCY ACTION</h2>
+      
+      <div class="sos-gps-box" id="gpsBox">
+        Fetching exact location...
+      </div>
+      
+      <div id="gpsMapContainer" style="width: 100%; height: 200px; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 16px; display: none; background: #1e293b;">
+        <iframe id="gpsMapIframe" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+      </div>
+      
+      <input type="text" id="manualLocation" placeholder="Or type address/landmark here..." style="width: 100%; padding: 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; margin-bottom: 24px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem;">
+
+      <div class="sos-grid">
+        <button class="sos-action-btn red" onclick="alertHospital()" id="btnAlert">📡 Alert Nearest Hospital</button>
+        <button class="sos-action-btn" onclick="getGPS()">📍 Show My GPS Coordinates</button>
+        <a href="tel:112" class="sos-action-btn">🚑 Call Ambulance (112)</a>
+        <a href="tel:100" class="sos-action-btn">🚓 Call Police (100)</a>
+        <a href="tel:101" class="sos-action-btn">🚒 Call Fire (101)</a>
+      </div>
+      <button class="nav-btn" onclick="closeSOS()" style="width:100%; border-color:#5a8a9e; text-align:center;">Cancel / Close</button>
+    </div>
+  </div>
+
+  <script>
+    window.lastKnownLat = null;
+    window.lastKnownLon = null;
+
+    function openSOS() {
+      document.getElementById('sosModal').classList.add('active');
+      
+      // Auto-fetch GPS instantly to save time in an emergency
+      const box = document.getElementById('gpsBox');
+      const mapContainer = document.getElementById('gpsMapContainer');
+      const mapIframe = document.getElementById('gpsMapIframe');
+      
+      box.style.display = 'block';
+      mapContainer.style.display = 'none';
+      box.textContent = 'Auto-acquiring GPS location...';
+      
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            window.lastKnownLat = pos.coords.latitude;
+            window.lastKnownLon = pos.coords.longitude;
+            box.innerHTML = `LAT: ${window.lastKnownLat.toFixed(6)}<br>LON: ${window.lastKnownLon.toFixed(6)}<br>ACCURACY: ±${Math.round(pos.coords.accuracy)}m`;
+            mapIframe.src = `https://maps.google.com/maps?q=${window.lastKnownLat},${window.lastKnownLon}&z=16&output=embed`;
+            mapContainer.style.display = 'block';
+          },
+          (err) => {
+            box.textContent = 'Location access denied or unavailable.';
+          },
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+      } else {
+        box.textContent = 'Geolocation not supported by this device.';
+      }
+    }
+
+    function closeSOS() {
+      document.getElementById('sosModal').classList.remove('active');
+      document.getElementById('gpsBox').style.display = 'none';
+      document.getElementById('gpsBox').textContent = 'Fetching exact location...';
+      document.getElementById('manualLocation').value = '';
+      const mapContainer = document.getElementById('gpsMapContainer');
+      if (mapContainer) mapContainer.style.display = 'none';
+      const alertBtn = document.getElementById('btnAlert');
+      alertBtn.textContent = '📡 Alert Nearest Hospital';
+      alertBtn.style.background = '';
+      alertBtn.style.color = '';
+      alertBtn.style.borderColor = '';
+      alertBtn.style.pointerEvents = 'auto';
+    }
+
+    function getGPS() {
+      // Re-trigger the auto-fetch logic as a manual refresh
+      openSOS();
+    }
+
+    async function alertHospital() {
+      const btn = document.getElementById('btnAlert');
+      btn.textContent = 'Acquiring GPS...';
+      btn.style.pointerEvents = 'none';
+
+      let lat = null, lon = null;
+      
+      const manualLoc = document.getElementById('manualLocation').value.trim();
+      const sendAlert = async () => {
+        btn.textContent = 'Sending Alert...';
+        try {
+          const res = await fetch('/api/sos-alert', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ timestamp: new Date().toISOString(), lat, lon, manual_location: manualLoc })
+          });
+          if (res.ok) {
+            btn.textContent = (lat && lon) || manualLoc ? '✅ Hospital Notified (With Location)' : '✅ Hospital Notified (No Location)';
+            btn.style.background = 'rgba(0, 229, 160, 0.2)';
+            btn.style.color = '#00e5a0';
+            btn.style.borderColor = 'rgba(0, 229, 160, 0.5)';
+          } else {
+            btn.textContent = '❌ Failed to alert';
+            btn.style.pointerEvents = 'auto';
+          }
+        } catch(e) {
+          btn.textContent = '❌ Connection Error';
+          btn.style.pointerEvents = 'auto';
+        }
+      };
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => { lat = pos.coords.latitude; lon = pos.coords.longitude; sendAlert(); },
+          (err) => { sendAlert(); },
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+      } else {
+        sendAlert();
+      }
+    }
+  </script>
 
   <!-- Feature strip -->
   <div class="feature-strip">
