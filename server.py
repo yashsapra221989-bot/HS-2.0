@@ -52,6 +52,7 @@ def init_db():
     c.execute('''
         CREATE TABLE IF NOT EXISTS medical_records (
             id TEXT PRIMARY KEY,
+            account_id TEXT,
             name TEXT,
             blood_type TEXT,
             allergies TEXT,
@@ -72,6 +73,13 @@ def init_db():
             doctor TEXT
         )
     ''')
+    try:
+        c.execute('ALTER TABLE medical_records ADD COLUMN account_id TEXT')
+    except Exception:
+        pass
+    
+    # Associate existing records to their own ID as the main account
+    c.execute('UPDATE medical_records SET account_id = id WHERE account_id IS NULL')
     # SOS Alerts table
     c.execute('''
         CREATE TABLE IF NOT EXISTS sos_alerts (
@@ -136,9 +144,10 @@ def save_medical_data():
     try:
         data = request.json
         user_id = data.get('id') or str(uuid.uuid4())
+        account_id = data.get('account_id') or user_id
         password = data.get('password')  # Optional: from registration form
 
-        print(f"[SAVE] Saving data for user: {user_id} (photo excluded)")
+        print(f"[SAVE] Saving data for profile: {user_id} (Account: {account_id}, photo excluded)")
 
         conn = sqlite3.connect(DATABASE)
         c = conn.cursor()
@@ -192,10 +201,11 @@ def save_medical_data():
             print(f"[SAVE] Creating new record for {user_id}")
             c.execute('''
                 INSERT INTO medical_records
-                (id, name, blood_type, allergies, conditions, emergency_contact, photo, created_at, updated_at, dob, gender, weight, height, abha, meds, surgeries, ecName, ecRel, doctor)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (id, account_id, name, blood_type, allergies, conditions, emergency_contact, photo, created_at, updated_at, dob, gender, weight, height, abha, meds, surgeries, ecName, ecRel, doctor)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 user_id,
+                account_id,
                 data.get('name', ''),
                 data.get('blood', ''),
                 data.get('allergy', ''),
@@ -263,12 +273,13 @@ def register():
         c.execute('INSERT INTO users (user_id, password, created_at) VALUES (?, ?, ?)',
                   (user_id, hash_password(password), now))
 
-        # Create medical record
+        # Create medical record for primary account holder
         c.execute('''
             INSERT INTO medical_records
-            (id, name, blood_type, allergies, conditions, emergency_contact, photo, created_at, updated_at, dob, gender, weight, height, abha, meds, surgeries, ecName, ecRel, doctor)
-            VALUES (?, ?, ?, ?, ?, ?, NULL, ?, ?, '', '', '', '', '', '', '', '', '', '')
+            (id, account_id, name, blood_type, allergies, conditions, emergency_contact, photo, created_at, updated_at, dob, gender, weight, height, abha, meds, surgeries, ecName, ecRel, doctor)
+            VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, '', '', '', '', '', '', '', '', '', '')
         ''', (
+            user_id,
             user_id,
             name,
             data.get('blood', ''),
@@ -315,6 +326,52 @@ def login():
         return {'success': True, 'user_id': user_id, 'message': 'Login successful'}
     except Exception as e:
         return {'success': False, 'error': str(e)}, 500
+
+@app.route('/api/get-family-profiles/<account_id>', methods=['GET'])
+def get_family_profiles(account_id):
+    """Retrieve all profiles tied to a primary account."""
+    try:
+        conn = sqlite3.connect(DATABASE)
+        c = conn.cursor()
+        c.execute('SELECT id, name, ecRel FROM medical_records WHERE account_id = ? ORDER BY created_at ASC', (account_id,))
+        rows = c.fetchall()
+        conn.close()
+
+        profiles = [{'id': r[0], 'name': r[1], 'ecRel': r[2]} for r in rows]
+        return {'success': True, 'profiles': profiles}
+    except Exception as e:
+        return {'success': False, 'error': str(e)}, 500
+
+@app.route('/api/add-family-profile', methods=['POST'])
+def add_family_profile():
+    """Create an empty profile for a family member."""
+    try:
+        data = request.json
+        account_id = data.get('account_id')
+        name = data.get('name', '').strip()
+        relation = data.get('relation', '').strip()
+
+        if not account_id or not name:
+            return {'success': False, 'error': 'account_id and name are required'}, 400
+
+        member_id = f"DEP-{uuid.uuid4().hex[:8]}"
+        now = datetime.now().isoformat()
+
+        conn = sqlite3.connect(DATABASE)
+        c = conn.cursor()
+        c.execute('''
+            INSERT INTO medical_records
+            (id, account_id, name, ecRel, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (member_id, account_id, name, relation, now, now))
+        conn.commit()
+        conn.close()
+
+        print(f"[FAMILY] Created new profile {member_id} for {account_id}")
+        return {'success': True, 'profile_id': member_id, 'name': name, 'message': 'Profile created'}
+    except Exception as e:
+        return {'success': False, 'error': str(e)}, 500
+
 
 @app.route('/api/get-medical-data/<user_id>', methods=['GET'])
 def get_medical_data(user_id):

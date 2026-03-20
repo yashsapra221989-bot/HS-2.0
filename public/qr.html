@@ -69,7 +69,15 @@
     .block-val { font-size: 0.95rem; line-height: 1.5; }
     .block-val.empty { color: var(--text3); font-style: italic; font-size: 0.88rem; }
 
-    /* ── Modal ── */
+    /* ── Modal & Family Switcher ── */
+    .family-switcher { overflow-x: auto; display: flex; gap: 12px; padding-bottom: 8px; margin-bottom: 24px; }
+    .family-switcher::-webkit-scrollbar { height: 4px; }
+    .family-btn { padding: 10px 20px; border-radius: 12px; background: var(--surface2); border: 1px solid var(--border); color: var(--text2); cursor: pointer; transition: 0.2s; font-family: 'DM Sans', sans-serif; font-weight: 600; white-space: nowrap; }
+    .family-btn.active { background: var(--accent-dim); color: var(--accent); border-color: rgba(0,200,255,0.3); }
+    .family-btn:hover:not(.active) { border-color: var(--accent); color: var(--text); }
+    .btn-add-member { background: rgba(0,229,160,0.1); color: var(--green); border-color: rgba(0,229,160,0.25); border-style: dashed; }
+    .btn-add-member:hover { background: rgba(0,229,160,0.2); border-color: var(--green); }
+
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); z-index: 1000; display: none; align-items: center; justify-content: center; }
     .modal-overlay.active { display: flex; animation: fadeIn 0.25s ease; }
     @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
@@ -99,6 +107,11 @@
   </nav>
 
   <div class="page-body">
+    <!-- TOP: Family Switcher -->
+    <div class="family-switcher" id="familySwitcher">
+      <!-- Injected via JS -->
+    </div>
+
     <div class="container">
       <!-- LEFT: QR -->
       <div>
@@ -156,20 +169,77 @@
     </div>
   </div>
 
+  <!-- MODAL: ADD FAMILY MEMBER -->
+  <div class="modal-overlay" id="addMemberModal">
+    <div class="modal-card">
+      <h3>Add Family Member</h3>
+      <div class="form-group"><label>Full Name</label><input type="text" id="newMemberName" placeholder="e.g. Jane Doe"></div>
+      <div class="form-group"><label>Relationship</label><input type="text" id="newMemberRel" placeholder="e.g. Spouse, Child, Parent"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" style="flex:1;" onclick="closeAddMemberModal()">Cancel</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="saveNewMember()">Add Member</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="script.js"></script>
   <script>
     let currentUser = null;
+    let accountId = null;
+
     window.addEventListener('DOMContentLoaded', () => {
-      const loggedInId = sessionStorage.getItem('loggedInUser');
-      if (!loggedInId) { window.location.href = 'login.html?role=patient'; return; }
+      accountId = sessionStorage.getItem('loggedInUser');
+      if (!accountId) { window.location.href = 'login.html?role=patient'; return; }
+      
+      let currentProfileId = sessionStorage.getItem('currentProfileId') || accountId;
       const patients = getPatients();
-      currentUser = patients.find(p => p.id === loggedInId);
-      if (!currentUser) return;
-      if (!currentUser.medComplete) { window.location.href = 'sync.html'; return; }
+      
+      currentUser = patients.find(p => p.id === currentProfileId);
+      if (!currentUser) {
+         // Fallback if profile not found
+         currentUser = patients.find(p => p.id === accountId);
+         if(currentUser) {
+            sessionStorage.setItem('currentProfileId', accountId);
+         } else {
+            return;
+         }
+      }
+
+      renderFamilySwitcher();
+      
+      if (!currentUser.medComplete) {
+         // We might be looking at an empty profile
+         document.getElementById('editModal').querySelector('h3').textContent = "Complete Profile Info";
+      }
+
       renderQRCodeOnPage('qrcode', currentUser.id);
       refreshSummary();
     });
+
+    function renderFamilySwitcher() {
+      const switcher = document.getElementById('familySwitcher');
+      switcher.innerHTML = '';
+      const patients = getPatients();
+      const myProfiles = patients.filter(p => p.account_id === accountId || p.id === accountId);
+
+      myProfiles.forEach(p => {
+        const btn = document.createElement('button');
+        btn.className = 'family-btn ' + (p.id === currentUser.id ? 'active' : '');
+        btn.textContent = p.id === accountId ? 'My Profile' : (p.name || 'Unnamed');
+        btn.onclick = () => {
+          sessionStorage.setItem('currentProfileId', p.id);
+          window.location.reload();
+        };
+        switcher.appendChild(btn);
+      });
+
+      const addBtn = document.createElement('button');
+      addBtn.className = 'family-btn btn-add-member';
+      addBtn.textContent = '+ Add Family Member';
+      addBtn.onclick = () => openAddMemberModal();
+      switcher.appendChild(addBtn);
+    }
 
     function refreshSummary() {
       document.getElementById('cardName').textContent = currentUser.name || 'Unknown';
@@ -201,10 +271,38 @@
       currentUser.allergies = parts(document.getElementById('modAllergies').value);
       currentUser.meds = parts(document.getElementById('modMeds').value);
       currentUser.conditions = parts(document.getElementById('modConds').value);
+      currentUser.medComplete = true;
+
       const patients = getPatients();
       const idx = patients.findIndex(p => p.id === currentUser.id);
       if (idx !== -1) { patients[idx] = currentUser; savePatients(patients); }
+      
+      saveMedicalDataToServer(); // Optional push
       refreshSummary(); closeModal(); showToast('Profile updated!', 'success');
+      
+      // Remove any complete profile warnings
+      renderFamilySwitcher();
+    }
+
+    function openAddMemberModal() { document.getElementById('addMemberModal').classList.add('active'); }
+    function closeAddMemberModal() { document.getElementById('addMemberModal').classList.remove('active'); }
+
+    async function saveNewMember() {
+      const name = document.getElementById('newMemberName').value.trim();
+      const rel = document.getElementById('newMemberRel').value.trim();
+      if (!name) { showToast('Name is required', 'error'); return; }
+      
+      const btn = document.querySelector('#addMemberModal .btn-primary');
+      btn.textContent = 'Adding...'; btn.disabled = true;
+
+      const newId = await createFamilyMember(name, rel);
+      if (newId) {
+        sessionStorage.setItem('currentProfileId', newId);
+        window.location.reload();
+      } else {
+        showToast('Failed to create profile', 'error');
+        btn.textContent = 'Add Member'; btn.disabled = false;
+      }
     }
 
     function previewScan() { window.location.href = `viewer.html?id=${encodeURIComponent(currentUser.id)}`; }

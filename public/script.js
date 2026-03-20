@@ -78,6 +78,7 @@ function registerUser(name, email, phone, password) {
 
     const newUser = {
         id: newId,
+        account_id: newId,
         name,
         email,
         phone,
@@ -92,6 +93,7 @@ function registerUser(name, email, phone, password) {
     savePatients(patients);
 
     sessionStorage.setItem('loggedInUser', newId);
+    sessionStorage.setItem('currentProfileId', newId); // Set the default profile to self
     showToast('Account created! Welcome to HealthSync.', 'success');
 
     setTimeout(() => { window.location.href = 'sync.html'; }, 1200);
@@ -117,6 +119,7 @@ function userLogin(email, password) {
     }
 
     sessionStorage.setItem('loggedInUser', user.id);
+    sessionStorage.setItem('currentProfileId', user.id); // Default to self on login
     showToast('Login successful! Redirecting…', 'success');
 
     setTimeout(() => {
@@ -126,11 +129,11 @@ function userLogin(email, password) {
 
 // ─── 3. SAVE MEDICAL DATA TO LOCALSTORAGE ───────────────────────────────────
 function saveMedicalDataToLocal() {
-    const loggedInId = sessionStorage.getItem('loggedInUser');
-    if (!loggedInId) return false;
+    const profileId = sessionStorage.getItem('currentProfileId');
+    if (!profileId) return false;
 
     const patients = getPatients();
-    const index = patients.findIndex(p => p.id === loggedInId);
+    const index = patients.findIndex(p => p.id === profileId);
     if (index === -1) return false;
 
     const getValue = id => {
@@ -162,8 +165,9 @@ function saveMedicalDataToLocal() {
 
 // ─── 4. SAVE TO SERVER (NON-BLOCKING) ───────────────────────────────────────
 async function saveMedicalDataToServer() {
-    const loggedInId = sessionStorage.getItem('loggedInUser');
-    if (!loggedInId) return;
+    const profileId = sessionStorage.getItem('currentProfileId');
+    const accountId = sessionStorage.getItem('loggedInUser');
+    if (!profileId || !accountId) return;
 
     const getValue = id => {
         const el = document.getElementById(id);
@@ -171,7 +175,8 @@ async function saveMedicalDataToServer() {
     };
 
     const payload = {
-        id:       loggedInId,
+        id:       profileId,
+        account_id: accountId,
         name:     getValue('name'),
         blood:    getValue('blood'),
         dob:      getValue('dob'),
@@ -232,6 +237,44 @@ function generateQR() {
     setTimeout(() => {
         window.location.href = 'qr.html';
     }, 900);
+}
+
+// ─── 5.5 ADD FAMILY MEMBER ───────────────────────────────────────────────────
+async function createFamilyMember(name, relation) {
+    const accountId = sessionStorage.getItem('loggedInUser');
+    if (!accountId) return null;
+
+    const year = new Date().getFullYear();
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+    const newId = `DEP-${year}-${randomNum}`; // Dependant prefix
+
+    const newUser = {
+        id: newId,
+        account_id: accountId,
+        name: name,
+        ecRel: relation,
+        medComplete: false,
+        blood: '', dob: '', gender: '', weight: '', height: '', abha: '',
+        allergies: [], meds: [], conditions: [], surgeries: '',
+        ecName: '', ecPhone: '', doctor: ''
+    };
+
+    const patients = getPatients();
+    patients.push(newUser);
+    savePatients(patients);
+
+    // Try server sync
+    try {
+        await fetch('/api/add-family-profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ account_id: accountId, name, relation })
+        });
+    } catch (e) {
+        console.warn('Server sync failed, continuing locally.');
+    }
+
+    return newId;
 }
 
 // ─── 6. RENDER QR CODE ──────────────────────────────────────────────────────

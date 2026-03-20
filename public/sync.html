@@ -165,9 +165,11 @@
     window.addEventListener('DOMContentLoaded', () => {
       const loggedInId = sessionStorage.getItem('loggedInUser');
       if (!loggedInId) { window.location.href = 'login.html?role=patient'; return; }
+      
+      const profileId = sessionStorage.getItem('currentProfileId') || loggedInId;
 
       const patients = getPatients();
-      const user = patients.find(p => p.id === loggedInId);
+      const user = patients.find(p => p.id === profileId);
       if (user) {
         document.getElementById('name').value = user.name || '';
         document.getElementById('dob').value = user.dob || '';
