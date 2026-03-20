@@ -48,7 +48,17 @@ def init_db():
             emergency_contact TEXT,
             photo BLOB,
             created_at TIMESTAMP,
-            updated_at TIMESTAMP
+            updated_at TIMESTAMP,
+            dob TEXT,
+            gender TEXT,
+            weight TEXT,
+            height TEXT,
+            abha TEXT,
+            meds TEXT,
+            surgeries TEXT,
+            ecName TEXT,
+            ecRel TEXT,
+            doctor TEXT
         )
     ''')
     # Users table for account credentials
@@ -128,7 +138,9 @@ def save_medical_data():
             c.execute('''
                 UPDATE medical_records
                 SET name = ?, blood_type = ?, allergies = ?, conditions = ?,
-                    emergency_contact = ?, photo = NULL, updated_at = ?
+                    emergency_contact = ?, photo = NULL, updated_at = ?,
+                    dob = ?, gender = ?, weight = ?, height = ?, abha = ?,
+                    meds = ?, surgeries = ?, ecName = ?, ecRel = ?, doctor = ?
                 WHERE id = ?
             ''', (
                 data.get('name', ''),
@@ -137,14 +149,24 @@ def save_medical_data():
                 data.get('condition', ''),
                 data.get('contact', ''),
                 datetime.now().isoformat(),
+                data.get('dob', ''),
+                data.get('gender', ''),
+                data.get('weight', ''),
+                data.get('height', ''),
+                data.get('abha', ''),
+                data.get('meds', ''),
+                data.get('surgeries', ''),
+                data.get('ecName', ''),
+                data.get('ecRel', ''),
+                data.get('doctor', ''),
                 user_id
             ))
         else:
             print(f"[SAVE] Creating new record for {user_id}")
             c.execute('''
                 INSERT INTO medical_records
-                (id, name, blood_type, allergies, conditions, emergency_contact, photo, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (id, name, blood_type, allergies, conditions, emergency_contact, photo, created_at, updated_at, dob, gender, weight, height, abha, meds, surgeries, ecName, ecRel, doctor)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 user_id,
                 data.get('name', ''),
@@ -154,7 +176,17 @@ def save_medical_data():
                 data.get('contact', ''),
                 None,
                 datetime.now().isoformat(),
-                datetime.now().isoformat()
+                datetime.now().isoformat(),
+                data.get('dob', ''),
+                data.get('gender', ''),
+                data.get('weight', ''),
+                data.get('height', ''),
+                data.get('abha', ''),
+                data.get('meds', ''),
+                data.get('surgeries', ''),
+                data.get('ecName', ''),
+                data.get('ecRel', ''),
+                data.get('doctor', '')
             ))
 
         conn.commit()
@@ -207,8 +239,8 @@ def register():
         # Create medical record
         c.execute('''
             INSERT INTO medical_records
-            (id, name, blood_type, allergies, conditions, emergency_contact, photo, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, NULL, ?, ?)
+            (id, name, blood_type, allergies, conditions, emergency_contact, photo, created_at, updated_at, dob, gender, weight, height, abha, meds, surgeries, ecName, ecRel, doctor)
+            VALUES (?, ?, ?, ?, ?, ?, NULL, ?, ?, '', '', '', '', '', '', '', '', '', '')
         ''', (
             user_id,
             name,
@@ -264,7 +296,8 @@ def get_medical_data(user_id):
         c = conn.cursor()
         
         c.execute('''
-            SELECT id, name, blood_type, allergies, conditions, emergency_contact, photo, updated_at
+            SELECT id, name, blood_type, allergies, conditions, emergency_contact, photo, updated_at,
+                   dob, gender, weight, height, abha, meds, surgeries, ecName, ecRel, doctor
             FROM medical_records WHERE id = ?
         ''', (user_id,))
         
@@ -294,7 +327,17 @@ def get_medical_data(user_id):
             'condition': row[4],
             'contact': row[5],
             'photo': photo_str,
-            'updated_at': row[7]
+            'updated_at': row[7],
+            'dob': row[8],
+            'gender': row[9],
+            'weight': row[10],
+            'height': row[11],
+            'abha': row[12],
+            'meds': row[13],
+            'surgeries': row[14],
+            'ecName': row[15],
+            'ecRel': row[16],
+            'doctor': row[17]
         }
     except Exception as e:
         import traceback

@@ -134,16 +134,16 @@
                 blood:     data.blood,
                 allergies: data.allergy  ? data.allergy.split(',').map(s => s.trim()).filter(Boolean)  : [],
                 conditions:data.condition? data.condition.split(',').map(s => s.trim()).filter(Boolean) : [],
-                meds:      [],
-                surgeries: '',
+                meds:      data.meds     ? data.meds.split(',').map(s => s.trim()).filter(Boolean)     : [],
+                surgeries: data.surgeries || '',
                 ecPhone:   data.contact,
-                ecName:    '',
-                ecRel:     '',
-                dob:       '',
-                gender:    '',
-                weight:    '',
-                height:    '',
-                abha:      ''
+                ecName:    data.ecName    || '',
+                ecRel:     data.ecRel     || '',
+                dob:       data.dob       || '',
+                gender:    data.gender    || '',
+                weight:    data.weight    || '',
+                height:    data.height    || '',
+                abha:      data.abha      || ''
               };
             }
           }

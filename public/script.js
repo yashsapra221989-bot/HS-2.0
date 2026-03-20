@@ -235,12 +235,29 @@ function generateQR() {
 }
 
 // ─── 6. RENDER QR CODE ──────────────────────────────────────────────────────
-function renderQRCodeOnPage(containerId, patientId) {
+async function renderQRCodeOnPage(containerId, patientId) {
     const qrContainer = document.getElementById(containerId);
     if (!qrContainer) return;
 
     qrContainer.innerHTML = '';
-    const url = window.location.origin + '/viewer.html?id=' + encodeURIComponent(patientId);
+    let url = window.location.origin + '/viewer.html?id=' + encodeURIComponent(patientId);
+
+    // Fetch the proper local network IP from the server
+    try {
+        const res = await fetch('/api/generate-qr-url', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: patientId })
+        });
+        if (res.ok) {
+            const data = await res.json();
+            if (data.success && data.qr_url) {
+                url = data.qr_url;
+            }
+        }
+    } catch (e) {
+        console.warn('Could not fetch network IP, using window.location.origin instead.');
+    }
 
     new QRCode(qrContainer, {
         text: url,
